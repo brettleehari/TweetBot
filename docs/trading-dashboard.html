@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autonomous Trading Dashboard - True Agentic Crypto Intelligence</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .portfolio-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        
+        .profit { color: #4CAF50; }
+        .loss { color: #F44336; }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .panel h2 {
+            margin-bottom: 15px;
+            color: #FFD700;
+        }
+        
+        .position {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .decision {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid;
+        }
+        
+        .decision.buy { border-left-color: #4CAF50; }
+        .decision.sell { border-left-color: #F44336; }
+        .decision.hold { border-left-color: #FFC107; }
+        
+        .agent-name {
+            font-weight: bold;
+            color: #FFD700;
+        }
+        
+        .confidence {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+        
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .status-active { background: #4CAF50; }
+        .status-inactive { background: #F44336; }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Autonomous Trading Dashboard</h1>
+            <p>True Agentic Crypto Intelligence - Real-time $10K Corpus Management</p>
+            <p><span class="status-indicator status-active"></span>Live Agent Decisions</p>
+        </div>
+        
+        <div class="portfolio-overview">
+            <div class="stat-card">
+                <div class="stat-value" id="totalValue">$10,000</div>
+                <div class="stat-label">Total Portfolio Value</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value profit" id="totalPnL">+$0.00</div>
+                <div class="stat-label">Total P&L</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalReturn">0.00%</div>
+                <div class="stat-label">Total Return</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="cashBalance">$10,000</div>
+                <div class="stat-label">Cash Balance</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" onclick="startTrading()">🚀 Start Autonomous Trading</button>
+            <button class="btn" onclick="pauseTrading()">⏸️ Pause Trading</button>
+            <button class="btn" onclick="resetPortfolio()">🔄 Reset Portfolio</button>
+        </div>
+        
+        <div class="dashboard-grid">
+            <div class="panel">
+                <h2>🎯 Current Positions</h2>
+                <div id="positions">
+                    <div style="text-align: center; opacity: 0.6; padding: 20px;">
+                        No positions yet. Start trading to see agent decisions.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>🤖 Recent Agent Decisions</h2>
+                <div id="decisions">
+                    <div style="text-align: center; opacity: 0.6; padding: 20px;">
+                        Waiting for agent decisions...
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>📊 Agent Performance</h2>
+            <div id="agentStats">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div class="stat-card">
+                        <div class="agent-name">Strategic Orchestrator</div>
+                        <div>Decisions: <span id="strategicCount">0</span></div>
+                        <div>Avg Confidence: <span id="strategicConfidence">0%</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="agent-name">Market Hunter</div>
+                        <div>Decisions: <span id="hunterCount">0</span></div>
+                        <div>Avg Confidence: <span id="hunterConfidence">0%</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="agent-name">Performance Optimizer</div>
+                        <div>Decisions: <span id="optimizerCount">0</span></div>
+                        <div>Avg Confidence: <span id="optimizerConfidence">0%</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AutonomousTradingSimulator {
+            constructor() {
+                this.startingCapital = 10000;
+                this.portfolio = {
+                    totalValue: 10000,
+                    cash: 10000,
+                    positions: [],
+                    totalPnL: 0,
+                    totalReturn: 0
+                };
+                this.decisions = [];
+                this.agentStats = {
+                    'Strategic Orchestrator': { count: 0, totalConfidence: 0 },
+                    'Market Hunter': { count: 0, totalConfidence: 0 },
+                    'Performance Optimizer': { count: 0, totalConfidence: 0 }
+                };
+                this.isTrading = false;
+                this.tradingInterval = null;
+            }
+            
+            generateMarketData() {
+                return {
+                    BTC: { price: 67890 * (1 + (Math.random() - 0.5) * 0.1), symbol: 'Bitcoin' },
+                    ETH: { price: 3420 * (1 + (Math.random() - 0.5) * 0.1), symbol: 'Ethereum' },
+                    SOL: { price: 145 * (1 + (Math.random() - 0.5) * 0.15), symbol: 'Solana' },
+                    ADA: { price: 0.45 * (1 + (Math.random() - 0.5) * 0.12), symbol: 'Cardano' },
+                    DOT: { price: 6.2 * (1 + (Math.random() - 0.5) * 0.13), symbol: 'Polkadot' }
+                };
+            }
+            
+            generateAgentDecision() {
+                const agents = [
+                    {
+                        name: 'Strategic Orchestrator',
+                        decisions: [
+                            { action: 'BUY', reasoning: 'Technical indicators show bullish divergence with volume confirmation' },
+                            { action: 'SELL', reasoning: 'Risk management: Taking profits on overextended position' },
+                            { action: 'HOLD', reasoning: 'Market consolidation phase, maintaining current allocation' },
+                            { action: 'BUY', reasoning: 'Institutional accumulation detected, positioning for next leg up' }
+                        ]
+                    },
+                    {
+                        name: 'Market Hunter',
+                        decisions: [
+                            { action: 'BUY', reasoning: 'Alpha opportunity: Emerging DeFi protocol with strong fundamentals' },
+                            { action: 'BUY', reasoning: 'Cross-chain arbitrage opportunity identified' },
+                            { action: 'SELL', reasoning: 'Momentum exhaustion signals, securing gains' },
+                            { action: 'BUY', reasoning: 'Narrative shift: AI + Crypto convergence accelerating' }
+                        ]
+                    },
+                    {
+                        name: 'Performance Optimizer',
+                        decisions: [
+                            { action: 'REBALANCE', reasoning: 'Portfolio optimization: Risk-adjusted returns can be improved' },
+                            { action: 'HOLD', reasoning: 'Current allocation optimal for Sharpe ratio maximization' },
+                            { action: 'SELL', reasoning: 'Position sizing adjustment for optimal Kelly criterion' }
+                        ]
+                    }
+                ];
+                
+                const agent = agents[Math.floor(Math.random() * agents.length)];
+                const decision = agent.decisions[Math.floor(Math.random() * agent.decisions.length)];
+                const marketData = this.generateMarketData();
+                const symbols = Object.keys(marketData);
+                const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+                
+                return {
+                    agent: agent.name,
+                    action: decision.action,
+                    symbol: symbol,
+                    symbolName: marketData[symbol].symbol,
+                    price: marketData[symbol].price,
+                    amount: Math.random() * 0.5 + 0.1,
+                    reasoning: decision.reasoning,
+                    confidence: Math.random() * 0.3 + 0.7,
+                    timestamp: new Date(),
+                    expectedReturn: Math.random() * 0.4 + 0.1
+                };
+            }
+            
+            executeDecision(decision) {
+                if (decision.action === 'BUY') {
+                    const cost = decision.amount * decision.price;
+                    if (this.portfolio.cash >= cost) {
+                        this.portfolio.cash -= cost;
+                        
+                        const existing = this.portfolio.positions.find(p => p.symbol === decision.symbol);
+                        if (existing) {
+                            const totalAmount = existing.amount + decision.amount;
+                            const totalCost = (existing.amount * existing.entryPrice) + cost;
+                            existing.entryPrice = totalCost / totalAmount;
+                            existing.amount = totalAmount;
+                        } else {
+                            this.portfolio.positions.push({
+                                symbol: decision.symbol,
+                                symbolName: decision.symbolName,
+                                amount: decision.amount,
+                                entryPrice: decision.price,
+                                currentPrice: decision.price
+                            });
+                        }
+                    }
+                } else if (decision.action === 'SELL') {
+                    const position = this.portfolio.positions.find(p => p.symbol === decision.symbol);
+                    if (position && position.amount >= decision.amount) {
+                        const proceeds = decision.amount * decision.price;
+                        this.portfolio.cash += proceeds;
+                        position.amount -= decision.amount;
+                        if (position.amount <= 0.001) {
+                            this.portfolio.positions = this.portfolio.positions.filter(p => p !== position);
+                        }
+                    }
+                }
+                
+                // Update agent stats
+                if (!this.agentStats[decision.agent]) {
+                    this.agentStats[decision.agent] = { count: 0, totalConfidence: 0 };
+                }
+                this.agentStats[decision.agent].count++;
+                this.agentStats[decision.agent].totalConfidence += decision.confidence;
+                
+                this.decisions.unshift(decision);
+                if (this.decisions.length > 20) this.decisions.pop();
+                
+                this.updatePortfolio();
+                this.updateUI();
+            }
+            
+            updatePortfolio() {
+                // Simulate price movements
+                this.portfolio.positions.forEach(position => {
+                    const priceChange = (Math.random() - 0.5) * 0.05; // ±2.5% movement
+                    position.currentPrice = position.entryPrice * (1 + priceChange);
+                });
+                
+                const positionValue = this.portfolio.positions.reduce((sum, pos) => 
+                    sum + (pos.amount * pos.currentPrice), 0);
+                
+                this.portfolio.totalValue = this.portfolio.cash + positionValue;
+                this.portfolio.totalPnL = this.portfolio.totalValue - this.startingCapital;
+                this.portfolio.totalReturn = (this.portfolio.totalPnL / this.startingCapital) * 100;
+            }
+            
+            updateUI() {
+                // Update portfolio overview
+                document.getElementById('totalValue').textContent = 
+                    '$' + this.portfolio.totalValue.toLocaleString(undefined, {maximumFractionDigits: 0});
+                
+                const pnlElement = document.getElementById('totalPnL');
+                const pnlSign = this.portfolio.totalPnL >= 0 ? '+' : '';
+                pnlElement.textContent = pnlSign + '$' + this.portfolio.totalPnL.toFixed(2);
+                pnlElement.className = this.portfolio.totalPnL >= 0 ? 'stat-value profit' : 'stat-value loss';
+                
+                const returnElement = document.getElementById('totalReturn');
+                const returnSign = this.portfolio.totalReturn >= 0 ? '+' : '';
+                returnElement.textContent = returnSign + this.portfolio.totalReturn.toFixed(2) + '%';
+                returnElement.className = this.portfolio.totalReturn >= 0 ? 'stat-value profit' : 'stat-value loss';
+                
+                document.getElementById('cashBalance').textContent = 
+                    '$' + this.portfolio.cash.toLocaleString(undefined, {maximumFractionDigits: 0});
+                
+                // Update positions
+                const positionsHtml = this.portfolio.positions.length === 0 ? 
+                    '<div style="text-align: center; opacity: 0.6; padding: 20px;">No positions</div>' :
+                    this.portfolio.positions.map(pos => {
+                        const pnl = (pos.amount * pos.currentPrice) - (pos.amount * pos.entryPrice);
+                        const pnlPercent = (pnl / (pos.amount * pos.entryPrice)) * 100;
+                        const pnlClass = pnl >= 0 ? 'profit' : 'loss';
+                        const pnlSign = pnl >= 0 ? '+' : '';
+                        
+                        return `
+                            <div class="position">
+                                <div>
+                                    <strong>${pos.symbol}</strong> (${pos.symbolName})<br>
+                                    <small>${pos.amount.toFixed(4)} units @ $${pos.entryPrice.toFixed(2)}</small>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div>$${(pos.amount * pos.currentPrice).toFixed(2)}</div>
+                                    <div class="${pnlClass}">
+                                        ${pnlSign}$${pnl.toFixed(2)} (${pnlSign}${pnlPercent.toFixed(1)}%)
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                document.getElementById('positions').innerHTML = positionsHtml;
+                
+                // Update decisions
+                const decisionsHtml = this.decisions.length === 0 ?
+                    '<div style="text-align: center; opacity: 0.6; padding: 20px;">No decisions yet</div>' :
+                    this.decisions.slice(0, 10).map(decision => {
+                        const actionClass = decision.action.toLowerCase();
+                        const time = decision.timestamp.toLocaleTimeString();
+                        return `
+                            <div class="decision ${actionClass}">
+                                <div class="agent-name">${decision.agent}</div>
+                                <div><strong>${decision.action}</strong> ${decision.amount.toFixed(4)} ${decision.symbol} @ $${decision.price.toFixed(2)}
+                                    <span class="confidence">${(decision.confidence * 100).toFixed(0)}%</span>
+                                </div>
+                                <div style="font-size: 0.9rem; margin-top: 5px; opacity: 0.8;">
+                                    ${decision.reasoning}
+                                </div>
+                                <div style="font-size: 0.8rem; margin-top: 5px; opacity: 0.6;">
+                                    ${time}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                document.getElementById('decisions').innerHTML = decisionsHtml;
+                
+                // Update agent stats
+                Object.entries(this.agentStats).forEach(([agent, stats]) => {
+                    const agentKey = agent.replace(' ', '').toLowerCase();
+                    const avgConfidence = stats.count > 0 ? (stats.totalConfidence / stats.count * 100).toFixed(0) : 0;
+                    
+                    if (agent === 'Strategic Orchestrator') {
+                        document.getElementById('strategicCount').textContent = stats.count;
+                        document.getElementById('strategicConfidence').textContent = avgConfidence + '%';
+                    } else if (agent === 'Market Hunter') {
+                        document.getElementById('hunterCount').textContent = stats.count;
+                        document.getElementById('hunterConfidence').textContent = avgConfidence + '%';
+                    } else if (agent === 'Performance Optimizer') {
+                        document.getElementById('optimizerCount').textContent = stats.count;
+                        document.getElementById('optimizerConfidence').textContent = avgConfidence + '%';
+                    }
+                });
+            }
+        }
+        
+        const simulator = new AutonomousTradingSimulator();
+        
+        function startTrading() {
+            if (simulator.isTrading) return;
+            
+            simulator.isTrading = true;
+            simulator.tradingInterval = setInterval(() => {
+                const decision = simulator.generateAgentDecision();
+                simulator.executeDecision(decision);
+            }, 3000); // New decision every 3 seconds
+        }
+        
+        function pauseTrading() {
+            simulator.isTrading = false;
+            if (simulator.tradingInterval) {
+                clearInterval(simulator.tradingInterval);
+                simulator.tradingInterval = null;
+            }
+        }
+        
+        function resetPortfolio() {
+            pauseTrading();
+            simulator.portfolio = {
+                totalValue: 10000,
+                cash: 10000,
+                positions: [],
+                totalPnL: 0,
+                totalReturn: 0
+            };
+            simulator.decisions = [];
+            simulator.agentStats = {
+                'Strategic Orchestrator': { count: 0, totalConfidence: 0 },
+                'Market Hunter': { count: 0, totalConfidence: 0 },
+                'Performance Optimizer': { count: 0, totalConfidence: 0 }
+            };
+            simulator.updateUI();
+        }
+        
+        // Initialize UI
+        simulator.updateUI();
+    </script>
+</body>
+</html>
