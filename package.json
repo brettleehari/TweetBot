@@ -19,7 +19,8 @@
     "demo-agents-simple": "node --loader ts-node/esm src/mastra/testing/simple-agent-demo.ts",
     "test-database": "node --loader ts-node/esm src/mastra/testing/test-database.ts",
     "demo-core-agency": "node --loader ts-node/esm src/mastra/testing/core-agency-demo.ts",
-    "agent-cli": "node --loader ts-node/esm src/mastra/testing/agent-cli.ts"
+    "agent-cli": "node --loader ts-node/esm src/mastra/testing/agent-cli.ts",
+    "test-performance-optimizer": "node --loader ts-node/esm src/mastra/testing/test-performance-optimizer.ts"
   },
   "keywords": [],
   "author": "",

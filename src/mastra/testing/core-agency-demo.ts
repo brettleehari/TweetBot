@@ -6,7 +6,11 @@
  * demonstrating emergent behavior without complex dependencies.
  */
 
+import { StrategicOrchestratorAgent } from '../agency/strategic-orchestrator-agent.js';
+import { MarketHunterAgent } from '../agency/market-hunter-agent.js';
+import { PerformanceOptimizerAgent } from '../agency/performance-optimizer-agent.js';
 import { AgenticDatabase, AgentSuggestion, StrategicDecisionLog, AlphaDiscoveryLog } from '../agency/agentic-database.js';
+import { liveMarketData, LiveMarketDataService } from '../services/live-market-data.js';
 
 const chalk = {
   blue: (text: string) => `\x1b[34m${text}\x1b[0m`,
@@ -26,14 +30,49 @@ class SimulatedMarketConditions {
   private sentiment: number = 0.0;
 
   evolve(): void {
-    // Simulate changing market conditions
-    const change = (Math.random() - 0.5) * 0.2;
-    this.sentiment = Math.max(-1, Math.min(1, this.sentiment + change));
-    this.volatility = Math.max(0.1, Math.min(1, this.volatility + (Math.random() - 0.5) * 0.1));
+    // Random market evolution
+    this.volatility = Math.max(0.1, Math.min(0.8, this.volatility + (Math.random() - 0.5) * 0.1));
+    this.sentiment = Math.max(-1, Math.min(1, this.sentiment + (Math.random() - 0.5) * 0.2));
     
-    if (this.sentiment > 0.3) this.currentRegime = 'bull';
-    else if (this.sentiment < -0.3) this.currentRegime = 'bear';
-    else this.currentRegime = 'sideways';
+    // Determine regime based on conditions
+    if (this.sentiment > 0.3 && this.volatility < 0.4) {
+      this.currentRegime = 'bull';
+    } else if (this.sentiment < -0.3 && this.volatility > 0.5) {
+      this.currentRegime = 'bear';
+    } else {
+      this.currentRegime = 'sideways';
+    }
+  }
+
+  // Update with live market data
+  updateWithLiveData(liveData: any): void {
+    try {
+      // Use live data to inform simulated conditions
+      if (liveData.indicators) {
+        this.volatility = Math.min(0.8, liveData.indicators.volatility || this.volatility);
+      }
+      
+      if (liveData.sentiment) {
+        this.sentiment = Math.max(-1, Math.min(1, liveData.sentiment.overallSentiment || this.sentiment));
+      }
+      
+      if (liveData.regime && liveData.regime.type) {
+        // Map market regime types
+        const regimeMap: { [key: string]: 'bull' | 'bear' | 'sideways' } = {
+          'bull_market': 'bull',
+          'bear_market': 'bear',
+          'sideways': 'sideways'
+        };
+        this.currentRegime = regimeMap[liveData.regime.type] || this.currentRegime;
+      } else {
+        // Fallback regime determination
+        this.evolve();
+      }
+      
+    } catch (error) {
+      // If live data processing fails, use normal evolution
+      this.evolve();
+    }
   }
 
   getState() {
@@ -49,10 +88,14 @@ class AutonomousAgentSimulator {
   private database: AgenticDatabase;
   private marketConditions: SimulatedMarketConditions;
   private agentStates: Map<string, any> = new Map();
+  private performanceOptimizer: PerformanceOptimizerAgent;
+  private marketDataService: LiveMarketDataService;
 
   constructor() {
     this.database = new AgenticDatabase();
     this.marketConditions = new SimulatedMarketConditions();
+    this.performanceOptimizer = new PerformanceOptimizerAgent();
+    this.marketDataService = liveMarketData;
     
     // Initialize agent states
     this.agentStates.set('strategic-orchestrator', {
@@ -71,9 +114,17 @@ class AutonomousAgentSimulator {
     
     this.agentStates.set('narrative-architect', {
       performance: 0.8,
-      confidence: 0.85,
+      confidence: 0.7,
       lastDecision: Date.now(),
-      contentCreated: 0
+      goalAdaptations: 0
+    });
+
+    this.agentStates.set('performance-optimizer', {
+      performance: 0.85,
+      confidence: 0.9,
+      lastDecision: Date.now(),
+      goalAdaptations: 0,
+      optimizationsCompleted: 0
     });
   }
 
@@ -149,6 +200,25 @@ class AutonomousAgentSimulator {
         };
         state.contentCreated++;
         break;
+
+      case 'performance-optimizer':
+        const optimizationTypes = ['response_time', 'success_rate', 'coordination', 'resource_allocation'];
+        const targetComponents = ['strategic-orchestrator', 'market-hunter', 'narrative-architect', 'system'];
+        suggestion = {
+          agentId,
+          type: 'system_optimization',
+          data: {
+            optimization_type: optimizationTypes[Math.floor(Math.random() * optimizationTypes.length)],
+            target_component: targetComponents[Math.floor(Math.random() * targetComponents.length)],
+            expected_improvement: Math.random() * 20 + 5, // 5-25% improvement
+            implementation_time: Math.random() * 300000 + 60000 // 1-5 minutes
+          },
+          rationale: `System performance analysis indicates potential for optimization. Current system efficiency at ${(state.performance * 100).toFixed(1)}%.`,
+          confidence: Math.max(0.7, state.confidence + (Math.random() - 0.5) * 0.1),
+          urgency: state.performance < 0.7 ? 'high' : 'medium'
+        };
+        state.optimizationsCompleted++;
+        break;
         
       default:
         throw new Error(`Unknown agent: ${agentId}`);
@@ -159,6 +229,21 @@ class AutonomousAgentSimulator {
     state.lastDecision = Date.now();
     
     return suggestion;
+  }
+
+  // Update market conditions with live data integration
+  private async updateMarketConditionsWithLiveData(): Promise<void> {
+    try {
+      // Try to get live market data
+      const liveData = await this.marketDataService.getLiveMarketData();
+      
+      // Update simulated conditions with live data
+      this.marketConditions.updateWithLiveData(liveData);
+      
+    } catch (error) {
+      // Fallback to simulated evolution if live data fails
+      this.marketConditions.evolve();
+    }
   }
 
   // Simulate agent adaptation based on performance
@@ -222,13 +307,13 @@ class AutonomousAgentSimulator {
       for (let cycle = 1; cycle <= 5; cycle++) {
         console.log(chalk.bold(`\n🔄 CYCLE ${cycle}: Market Evolution & Agent Decisions`));
         
-        // Evolve market conditions
-        this.marketConditions.evolve();
+        // Evolve market conditions with live data integration
+        await this.updateMarketConditionsWithLiveData();
         const market = this.marketConditions.getState();
         this.log(`Market: ${market.regime.toUpperCase()} | Volatility: ${(market.volatility * 100).toFixed(1)}% | Sentiment: ${market.sentiment > 0 ? '+' : ''}${(market.sentiment * 100).toFixed(0)}%`, 'info');
 
         // Each agent makes autonomous decisions
-        const agents = ['strategic-orchestrator', 'market-hunter', 'narrative-architect'];
+        const agents = ['strategic-orchestrator', 'market-hunter', 'narrative-architect', 'performance-optimizer'];
         
         for (const agentId of agents) {
           const suggestion = await this.simulateAgentDecision(agentId);
@@ -279,8 +364,20 @@ class AutonomousAgentSimulator {
           this.log('📈 Alpha discovery logged', 'success');
         }
 
-        // Simulate inter-agent communication every few cycles
+        // Run performance optimization cycle every few cycles
         if (cycle % 3 === 0) {
+          try {
+            const optimizations = await this.performanceOptimizer.autonomousOptimizationCycle();
+            if (optimizations.length > 0) {
+              this.log(`⚡ Performance optimization: ${optimizations.length} improvements completed`, 'success');
+            }
+          } catch (error) {
+            this.log(`⚠️ Performance optimization failed: ${error instanceof Error ? error.message : 'Unknown error'}`, 'warning');
+          }
+        }
+
+        // Simulate inter-agent communication every few cycles
+        if (cycle % 4 === 0) {
           await this.simulateAgentCommunication();
         }
 
