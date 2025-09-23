@@ -1,0 +1,26 @@
+(node:82458) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+--import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:82458) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+🚀 STARTING CONTINUOUS AUTONOMOUS TRADING SERVICE
+💰 Managing $10K corpus with 24/7 agent decisions
+📊 Interval: Every 30 minutes
+🛑 Press Ctrl+C to stop
+
+
+🤖 [9/23/2025, 6:02:16 AM] Strategic Orchestrator Decision:
+   BUY 0.683 AVAX @ $97.04
+   Reason: Long-term trend analysis shows strong support levels with bullish divergence
+   Confidence: 95%
+
+📊 PORTFOLIO STATUS:
+   💰 Total Value: $10001.40
+   📈 P&L: +$1.40
+   💵 Cash: $9933.72
+   🎯 Positions:
+      AVAX: 0.683 units - Value: $68
+         P&L: +$1.40
+
+🛑 Stopping autonomous trading service...
+✅ Trading service stopped and portfolio saved

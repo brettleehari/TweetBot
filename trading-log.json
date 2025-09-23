@@ -1,0 +1,29 @@
+[
+  {
+    "timestamp": "9/23/2025, 6:02:16 AM",
+    "agent": "Strategic Orchestrator",
+    "decision": {
+      "agent": "Strategic Orchestrator",
+      "action": "BUY",
+      "symbol": "AVAX",
+      "amount": 0.683,
+      "price": 97.04,
+      "confidence": 95,
+      "reasoning": "Long-term trend analysis shows strong support levels with bullish divergence",
+      "expectedReturn": 13
+    },
+    "portfolio": {
+      "totalValue": 10001.404981735799,
+      "cash": 9933.72168,
+      "positions": [
+        {
+          "symbol": "AVAX",
+          "amount": 0.683,
+          "avgPrice": 97.04,
+          "currentPrice": 99.09707428374628
+        }
+      ],
+      "totalPnL": 1.4049817357990833
+    }
+  }
+]

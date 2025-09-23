@@ -1,0 +1,19 @@
+[Unit]
+Description=Autonomous Crypto Trading Service
+After=network.target
+
+[Service]
+Type=simple
+User=vscode
+WorkingDirectory=/workspaces/TweetBot
+ExecStart=/usr/bin/node --loader ts-node/esm /workspaces/TweetBot/src/mastra/services/continuous-trading-service.ts
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Environment variables
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
