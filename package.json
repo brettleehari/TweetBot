@@ -20,7 +20,10 @@
     "test-database": "node --loader ts-node/esm src/mastra/testing/test-database.ts",
     "demo-core-agency": "node --loader ts-node/esm src/mastra/testing/core-agency-demo.ts",
     "agent-cli": "node --loader ts-node/esm src/mastra/testing/agent-cli.ts",
-    "test-performance-optimizer": "node --loader ts-node/esm src/mastra/testing/test-performance-optimizer.ts"
+    "test-performance-optimizer": "node --loader ts-node/esm src/mastra/testing/test-performance-optimizer.ts",
+    "live-stream": "node --loader ts-node/esm src/mastra/testing/simple-local-streaming.ts",
+    "stream-demo": "node --loader ts-node/esm src/mastra/testing/simple-streaming-demo.ts",
+    "web-server": "node --loader ts-node/esm src/mastra/testing/local-web-server.ts"
   },
   "keywords": [],
   "author": "",
