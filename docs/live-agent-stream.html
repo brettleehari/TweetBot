@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 Live Agent Stream - Real-time AI Agent Actions</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        
+        .connection-status {
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .status-connected {
+            background: rgba(76, 175, 80, 0.2);
+            border: 2px solid #4CAF50;
+            color: #4CAF50;
+        }
+        
+        .status-disconnected {
+            background: rgba(244, 67, 54, 0.2);
+            border: 2px solid #F44336;
+            color: #F44336;
+        }
+        
+        .status-connecting {
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px solid #FFC107;
+            color: #FFC107;
+        }
+        
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .agent-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .agent-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .agent-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .agent-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #FFD700;
+        }
+        
+        .agent-status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-active { background: #4CAF50; }
+        .status-inactive { background: #666; }
+        .status-thinking { background: #FFD700; }
+        .status-executing { background: #FF5722; }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .action-stream {
+            height: 300px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .action-item {
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid;
+            animation: slideIn 0.5s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .action-thinking { 
+            background: rgba(255, 215, 0, 0.1);
+            border-left-color: #FFD700;
+        }
+        
+        .action-analyzing { 
+            background: rgba(33, 150, 243, 0.1);
+            border-left-color: #2196F3;
+        }
+        
+        .action-deciding { 
+            background: rgba(156, 39, 176, 0.1);
+            border-left-color: #9C27B0;
+        }
+        
+        .action-executing { 
+            background: rgba(255, 87, 34, 0.1);
+            border-left-color: #FF5722;
+        }
+        
+        .action-learning { 
+            background: rgba(76, 175, 80, 0.1);
+            border-left-color: #4CAF50;
+        }
+        
+        .action-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .action-type {
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+        
+        .action-time {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+        
+        .action-description {
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .action-details {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        
+        .confidence-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF5722, #FFD700, #4CAF50);
+            border-radius: 2px;
+            transition: width 0.5s ease;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .stats-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #FFD700;
+        }
+        
+        .stat-label {
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .agents-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Live Agent Stream</h1>
+            <p>Real-time AI Agent Actions & Decision Making</p>
+            <div id="connectionStatus" class="connection-status status-connecting">
+                🔗 Connecting to agent stream...
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="connectToStream()">🔗 Connect</button>
+            <button class="btn" onclick="clearAllStreams()">🧹 Clear All</button>
+            <button class="btn" onclick="exportLog()">📥 Export Log</button>
+        </div>
+
+        <div id="agentsContainer" class="agents-grid">
+            <!-- Agent cards will be dynamically created here -->
+        </div>
+
+        <div class="stats-panel">
+            <div class="stat-item">
+                <div id="totalActions" class="stat-value">0</div>
+                <div class="stat-label">Total Actions</div>
+            </div>
+            <div class="stat-item">
+                <div id="activeAgents" class="stat-value">0</div>
+                <div class="stat-label">Active Agents</div>
+            </div>
+            <div class="stat-item">
+                <div id="avgConfidence" class="stat-value">0%</div>
+                <div class="stat-label">Avg Confidence</div>
+            </div>
+            <div class="stat-item">
+                <div id="actionsPerMin" class="stat-value">0</div>
+                <div class="stat-label">Actions/Min</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class LiveAgentStreamClient {
+            constructor() {
+                this.ws = null;
+                this.agents = new Map();
+                this.stats = {
+                    totalActions: 0,
+                    startTime: Date.now(),
+                    confidenceSum: 0,
+                    confidenceCount: 0
+                };
+                this.reconnectAttempts = 0;
+                this.maxReconnectAttempts = 5;
+            }
+
+            connect() {
+                try {
+                    this.ws = new WebSocket('ws://localhost:3001');
+                    
+                    this.ws.onopen = () => {
+                        console.log('🔗 Connected to live agent stream');
+                        this.updateConnectionStatus('connected');
+                        this.reconnectAttempts = 0;
+                    };
+                    
+                    this.ws.onmessage = (event) => {
+                        try {
+                            const message = JSON.parse(event.data);
+                            this.handleMessage(message);
+                        } catch (error) {
+                            console.error('❌ Error parsing message:', error);
+                        }
+                    };
+                    
+                    this.ws.onclose = () => {
+                        console.log('🔌 Disconnected from agent stream');
+                        this.updateConnectionStatus('disconnected');
+                        this.attemptReconnect();
+                    };
+                    
+                    this.ws.onerror = (error) => {
+                        console.error('❌ WebSocket error:', error);
+                        this.updateConnectionStatus('disconnected');
+                    };
+                    
+                } catch (error) {
+                    console.error('❌ Failed to connect:', error);
+                    this.updateConnectionStatus('disconnected');
+                }
+            }
+
+            attemptReconnect() {
+                if (this.reconnectAttempts < this.maxReconnectAttempts) {
+                    this.reconnectAttempts++;
+                    console.log(`🔄 Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
+                    this.updateConnectionStatus('connecting');
+                    setTimeout(() => this.connect(), 2000 * this.reconnectAttempts);
+                }
+            }
+
+            handleMessage(message) {
+                switch (message.type) {
+                    case 'agent_action':
+                        this.handleAgentAction(message.data);
+                        break;
+                    case 'agent_status':
+                        this.handleAgentStatus(message.data);
+                        break;
+                    case 'agent_history':
+                        this.handleAgentHistory(message.data);
+                        break;
+                    default:
+                        console.log('📨 Unknown message type:', message.type);
+                }
+            }
+
+            handleAgentAction(action) {
+                // Create agent card if it doesn't exist
+                if (!this.agents.has(action.agentId)) {
+                    this.createAgentCard(action.agentId, action.agentName);
+                }
+
+                // Add action to agent stream
+                this.addActionToStream(action);
+                
+                // Update agent status
+                this.updateAgentStatus(action.agentId, action.actionType);
+                
+                // Update statistics
+                this.updateStats(action);
+            }
+
+            createAgentCard(agentId, agentName) {
+                const agentCard = document.createElement('div');
+                agentCard.className = 'agent-card';
+                agentCard.id = `agent-${agentId}`;
+                
+                agentCard.innerHTML = `
+                    <div class="agent-header">
+                        <div class="agent-name">${agentName}</div>
+                        <div class="agent-status">
+                            <div class="status-indicator status-inactive" id="status-${agentId}"></div>
+                            <span id="status-text-${agentId}">Inactive</span>
+                        </div>
+                    </div>
+                    <div class="action-stream" id="stream-${agentId}">
+                        <div class="action-item">
+                            <div class="action-description">Waiting for agent actions...</div>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('agentsContainer').appendChild(agentCard);
+                this.agents.set(agentId, { name: agentName, element: agentCard });
+            }
+
+            addActionToStream(action) {
+                const streamElement = document.getElementById(`stream-${action.agentId}`);
+                if (!streamElement) return;
+
+                const actionElement = document.createElement('div');
+                actionElement.className = `action-item action-${action.actionType.toLowerCase()}`;
+                
+                let detailsHtml = '';
+                if (action.reasoning) {
+                    detailsHtml += `<div class="action-details">💭 ${action.reasoning}</div>`;
+                }
+                if (action.confidence) {
+                    detailsHtml += `
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: ${action.confidence}%"></div>
+                        </div>
+                        <div class="action-details">🎯 Confidence: ${action.confidence}%</div>
+                    `;
+                }
+                if (action.progress) {
+                    detailsHtml += `<div class="action-details">📊 Progress: ${action.progress.toFixed(1)}%</div>`;
+                }
+
+                actionElement.innerHTML = `
+                    <div class="action-header">
+                        <div class="action-type">${this.getActionEmoji(action.actionType)} ${action.actionType}</div>
+                        <div class="action-time">${new Date(action.timestamp).toLocaleTimeString()}</div>
+                    </div>
+                    <div class="action-description">${action.description}</div>
+                    ${detailsHtml}
+                `;
+
+                // Add to top of stream
+                streamElement.insertBefore(actionElement, streamElement.firstChild);
+
+                // Remove old actions (keep last 10)
+                while (streamElement.children.length > 10) {
+                    streamElement.removeChild(streamElement.lastChild);
+                }
+            }
+
+            updateAgentStatus(agentId, actionType) {
+                const statusIndicator = document.getElementById(`status-${agentId}`);
+                const statusText = document.getElementById(`status-text-${agentId}`);
+                
+                if (statusIndicator && statusText) {
+                    statusIndicator.className = `status-indicator status-${actionType.toLowerCase()}`;
+                    statusText.textContent = actionType.charAt(0) + actionType.slice(1).toLowerCase();
+                }
+            }
+
+            updateStats(action) {
+                this.stats.totalActions++;
+                
+                if (action.confidence) {
+                    this.stats.confidenceSum += action.confidence;
+                    this.stats.confidenceCount++;
+                }
+
+                // Update UI
+                document.getElementById('totalActions').textContent = this.stats.totalActions;
+                document.getElementById('activeAgents').textContent = this.agents.size;
+                
+                if (this.stats.confidenceCount > 0) {
+                    const avgConfidence = (this.stats.confidenceSum / this.stats.confidenceCount).toFixed(1);
+                    document.getElementById('avgConfidence').textContent = `${avgConfidence}%`;
+                }
+
+                const elapsedMinutes = (Date.now() - this.stats.startTime) / 60000;
+                const actionsPerMin = (this.stats.totalActions / elapsedMinutes).toFixed(1);
+                document.getElementById('actionsPerMin').textContent = actionsPerMin;
+            }
+
+            updateConnectionStatus(status) {
+                const statusElement = document.getElementById('connectionStatus');
+                statusElement.className = `connection-status status-${status}`;
+                
+                switch (status) {
+                    case 'connected':
+                        statusElement.innerHTML = '✅ Connected to live agent stream';
+                        break;
+                    case 'connecting':
+                        statusElement.innerHTML = '🔗 Connecting to agent stream...';
+                        break;
+                    case 'disconnected':
+                        statusElement.innerHTML = '❌ Disconnected from agent stream';
+                        break;
+                }
+            }
+
+            getActionEmoji(actionType) {
+                const emojis = {
+                    'THINKING': '🤔',
+                    'ANALYZING': '🔍',
+                    'DECIDING': '🎯',
+                    'EXECUTING': '⚡',
+                    'LEARNING': '🧠'
+                };
+                return emojis[actionType] || '🤖';
+            }
+
+            clearAllStreams() {
+                this.agents.forEach((agent, agentId) => {
+                    const streamElement = document.getElementById(`stream-${agentId}`);
+                    if (streamElement) {
+                        streamElement.innerHTML = '<div class="action-item"><div class="action-description">Stream cleared...</div></div>';
+                    }
+                });
+                
+                // Reset stats
+                this.stats = {
+                    totalActions: 0,
+                    startTime: Date.now(),
+                    confidenceSum: 0,
+                    confidenceCount: 0
+                };
+                this.updateStats({ confidence: null });
+            }
+
+            exportLog() {
+                const logData = {
+                    timestamp: new Date().toISOString(),
+                    stats: this.stats,
+                    agents: Array.from(this.agents.keys())
+                };
+                
+                const blob = new Blob([JSON.stringify(logData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `agent-stream-log-${Date.now()}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        // Global client instance
+        const streamClient = new LiveAgentStreamClient();
+
+        // Global functions for buttons
+        function connectToStream() {
+            streamClient.connect();
+        }
+
+        function clearAllStreams() {
+            streamClient.clearAllStreams();
+        }
+
+        function exportLog() {
+            streamClient.exportLog();
+        }
+
+        // Auto-connect on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                streamClient.connect();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

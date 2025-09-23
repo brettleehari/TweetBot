@@ -1,0 +1,137 @@
+name: 24/7 Production Trading Service
+
+on:
+  # Run on push to main branch
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/mastra/services/production-trading-service.ts'
+      - '.github/workflows/production-trading.yml'
+  
+  # Run on schedule (every 6 hours to keep service alive)
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+  
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  production-trading:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330  # 5.5 hours (under GitHub's 6-hour limit)
+    
+    strategy:
+      matrix:
+        node-version: [18.x]
+    
+    steps:
+    - name: 🚀 Checkout Repository
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: 📥 Install Dependencies
+      run: |
+        npm install -g ts-node typescript
+        npm install node-fetch @types/node-fetch
+    
+    - name: 🔍 Load Previous Portfolio State
+      run: |
+        # Try to restore portfolio from previous runs
+        if [ -f "production-portfolio.json" ]; then
+          echo "📁 Found existing portfolio state"
+          cat production-portfolio.json
+        else
+          echo "💰 Starting with fresh $10K portfolio"
+        fi
+    
+    - name: 🤖 Start Production Trading Service
+      run: |
+        echo "🚀 Starting 24/7 Production Autonomous Trading Service"
+        echo "💰 Managing $10K corpus with real market data"
+        echo "📊 This workflow will run for 5.5 hours then restart"
+        echo "🔄 Service makes decisions every 30 minutes"
+        echo ""
+        
+        # Set timeout to 5 hours (18000 seconds) to ensure graceful shutdown
+        timeout 18000 node --loader ts-node/esm src/mastra/services/production-trading-service.ts || {
+          echo "⏰ Workflow timeout reached - graceful shutdown"
+          echo "🔄 Next scheduled run will continue trading"
+        }
+    
+    - name: 💾 Save Portfolio State
+      if: always()  # Always save, even if timeout
+      run: |
+        echo "💾 Saving portfolio state for next run..."
+        if [ -f "production-portfolio.json" ]; then
+          echo "📊 Final Portfolio State:"
+          cat production-portfolio.json | jq '.'
+          
+          # Create summary for README
+          echo "## 🤖 Latest Trading Status" > trading-status.md
+          echo "**Last Updated:** $(date)" >> trading-status.md
+          echo "" >> trading-status.md
+          
+          TOTAL_VALUE=$(cat production-portfolio.json | jq -r '.totalValue')
+          TOTAL_RETURN=$(cat production-portfolio.json | jq -r '.totalReturn')
+          POSITIONS=$(cat production-portfolio.json | jq -r '.positions | length')
+          
+          echo "- 💰 **Portfolio Value:** \$$(echo $TOTAL_VALUE | xargs printf "%.2f")" >> trading-status.md
+          echo "- 📈 **Total Return:** $(echo $TOTAL_RETURN | xargs printf "%.2f")%" >> trading-status.md
+          echo "- 🎯 **Active Positions:** $POSITIONS" >> trading-status.md
+          echo "- 🕐 **Next Update:** In ~6 hours" >> trading-status.md
+          echo "" >> trading-status.md
+          echo "*Autonomous agents making decisions every 30 minutes with real market data*" >> trading-status.md
+        fi
+    
+    - name: 📤 Commit Trading Results
+      if: always()
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "Trading Bot"
+        
+        # Add trading files
+        git add production-portfolio.json production-trading-log.json trading-status.md 2>/dev/null || true
+        
+        # Only commit if there are changes
+        if ! git diff --staged --quiet; then
+          git commit -m "🤖 Update trading portfolio - $(date)"
+          git push
+          echo "✅ Trading results committed to repository"
+        else
+          echo "ℹ️ No changes to commit"
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Parallel job to update dashboard with latest results
+  update-dashboard:
+    runs-on: ubuntu-latest
+    needs: production-trading
+    if: always()  # Run even if trading job fails
+    
+    steps:
+    - name: 🚀 Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Get all history
+    
+    - name: 🔄 Pull Latest Changes
+      run: git pull origin main
+    
+    - name: 📊 Update Dashboard Status
+      run: |
+        if [ -f "production-portfolio.json" ]; then
+          echo "🎯 Updating live dashboard with latest portfolio data"
+          
+          # Update dashboard with real portfolio data
+          PORTFOLIO_DATA=$(cat production-portfolio.json)
+          
+          # You could integrate this with your web dashboard here
+          echo "Dashboard integration would go here"
+          echo "Portfolio data: $PORTFOLIO_DATA"
+        fi

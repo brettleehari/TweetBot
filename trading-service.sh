@@ -1,9 +1,9 @@
 #!/bin/bash
 # 24/7 Autonomous Trading Service Launcher
-# Runs the continuous trading service in the background
+# Runs the production trading service in the background
 
 SERVICE_NAME="autonomous-trading"
-SERVICE_FILE="/workspaces/TweetBot/src/mastra/services/continuous-trading-service.ts"
+SERVICE_FILE="/workspaces/TweetBot/src/mastra/services/production-trading-service.ts"
 PID_FILE="/tmp/autonomous-trading.pid"
 LOG_FILE="/workspaces/TweetBot/trading-service.log"
 
@@ -13,8 +13,9 @@ start_service() {
         return 1
     fi
     
-    echo "🚀 Starting 24/7 Autonomous Trading Service..."
-    echo "📊 Managing $10K corpus with continuous agent decisions"
+    echo "🚀 Starting 24/7 PRODUCTION Trading Service..."
+    echo "� Managing $10K corpus with REAL market data"
+    echo "📊 Trading: Every 30min | Prices: Every 5min"
     echo "📁 Logs: $LOG_FILE"
     
     # Start the service in background

@@ -1,0 +1,18 @@
+{
+  "totalValue": 10000,
+  "cash": 8500,
+  "positions": [
+    {
+      "symbol": "MATIC",
+      "amount": 1790.4724592131058,
+      "avgPrice": 0.8377677033129203,
+      "currentPrice": 0.8377677033129203,
+      "marketValue": 1500,
+      "pnl": 0,
+      "pnlPercent": 0
+    }
+  ],
+  "totalPnL": 0,
+  "totalReturn": 0,
+  "lastUpdated": "2025-09-23T17:25:52.007Z"
+}

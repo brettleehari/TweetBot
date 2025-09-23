@@ -1,0 +1,15 @@
+[
+  {
+    "timestamp": "2025-09-23T17:25:51.409Z",
+    "agent": "Market Hunter",
+    "action": "BUY",
+    "symbol": "MATIC",
+    "amount": 1790.4724592131058,
+    "price": 0.8377677033129203,
+    "confidence": 75,
+    "reasoning": "On-chain metrics show whale accumulation at current levels",
+    "expectedReturn": 12,
+    "executed": true,
+    "portfolioValue": 10000
+  }
+]
