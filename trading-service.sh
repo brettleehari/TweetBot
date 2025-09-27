@@ -3,7 +3,7 @@
 # Runs the production trading service in the background
 
 SERVICE_NAME="autonomous-trading"
-SERVICE_FILE="/workspaces/TweetBot/src/mastra/services/production-trading-service.ts"
+SERVICE_FILE="/workspaces/TweetBot/enhanced-24x7-trading.ts"
 PID_FILE="/tmp/autonomous-trading.pid"
 LOG_FILE="/workspaces/TweetBot/trading-service.log"
 

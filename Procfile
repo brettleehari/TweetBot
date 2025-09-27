@@ -1,1 +1,1 @@
-web: node --loader ts-node/esm src/mastra/services/production-trading-service.ts
+web: node --loader ts-node/esm enhanced-24x7-trading.ts
