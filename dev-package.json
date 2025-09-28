@@ -1,0 +1,7 @@
+{
+  "name": "btc-dev-environment",
+  "scripts": {
+    "dev": "node dev-btc-agent.js",
+    "dev-watch": "nodemon dev-btc-agent.js"
+  }
+}

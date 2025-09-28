@@ -1,8 +1,18 @@
 {
-  "totalValue": 10000,
-  "cash": 10000,
-  "positions": [],
-  "totalPnL": 0,
-  "totalReturn": 0,
-  "lastUpdated": "2025-09-28T19:07:45.641Z"
+  "totalValue": 11520.282361303389,
+  "cash": 6962.146218917541,
+  "positions": [
+    {
+      "symbol": "LINK",
+      "amount": 215.38910234195114,
+      "avgPrice": 14.104027307099182,
+      "currentPrice": 21.162334086658497,
+      "marketValue": 4558.136142385848,
+      "pnl": 1520.2823613033888,
+      "pnlPercent": 50.04461935497358
+    }
+  ],
+  "totalPnL": 1520.2823613033888,
+  "totalReturn": 15.202823613033889,
+  "lastUpdated": "2025-09-28T22:20:00.403Z"
 }
