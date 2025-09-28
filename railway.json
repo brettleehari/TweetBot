@@ -4,17 +4,8 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "npm run trading-prod",
-    "restartPolicyType": "ALWAYS"
-  },
-  "environment": {
-    "NODE_ENV": "production",
-    "PORT": "3000"
-  },
-  "healthcheck": {
-    "path": "/api/status",
-    "interval": 30,
-    "timeout": 10,
-    "retries": 3
+    "startCommand": "node --loader ts-node/esm enhanced-24x7-trading.ts",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
   }
 }
