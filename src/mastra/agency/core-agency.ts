@@ -571,3 +571,4 @@ export interface Resolution {
   rationale: string;
   compromises: string[];
   newGoals?: Partial<Goal>[];
+}

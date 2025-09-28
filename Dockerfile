@@ -5,9 +5,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install -g ts-node typescript
-RUN npm install
+# Install dependencies  
+RUN npm install --production
 
 # Copy source code
 COPY . .
@@ -15,5 +14,5 @@ COPY . .
 # Expose port
 EXPOSE 3000
 
-# Start the enhanced 24/7 trading service with web dashboard
-CMD ["node", "--loader", "ts-node/esm", "enhanced-24x7-trading.ts"]
+# Start the simple production trading service
+CMD ["node", "simple-production-trading.js"]

@@ -1,1 +1,1 @@
-web: node --loader ts-node/esm enhanced-24x7-trading.ts
+web: node simple-production-trading.js

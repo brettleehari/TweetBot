@@ -1,0 +1,15 @@
+[
+  {
+    "timestamp": "2025-09-28T19:07:45.648Z",
+    "agent": "Narrative Architect",
+    "action": "HOLD",
+    "symbol": "ADA",
+    "amount": 0,
+    "price": 0.44119965863482735,
+    "confidence": 97,
+    "reasoning": "Macro environment favors digital assets",
+    "expectedReturn": 11,
+    "executed": true,
+    "portfolioValue": 10000
+  }
+]
