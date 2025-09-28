@@ -136,15 +136,42 @@ class SimpleTradingBot {
     </div>
 
     <script>
-        const ws = new WebSocket(window.location.protocol === 'https:' ? 'wss:' : 'ws:' + '//' + window.location.host);
+        // WebSocket connection for Railway deployment
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = protocol + '//' + window.location.host;
         
-        ws.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-            if (data.type === 'trading-update') {
-                updateDashboard(data.portfolio);
-                addLogEntry(data.decision);
+        let ws;
+        function connectWebSocket() {
+            try {
+                ws = new WebSocket(wsUrl);
+                
+                ws.onmessage = function(event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        if (data.type === 'trading-update') {
+                            updateDashboard(data.portfolio);
+                            addLogEntry(data.decision);
+                        }
+                    } catch (e) {
+                        console.log('WebSocket message error:', e);
+                    }
+                };
+                
+                ws.onclose = function() {
+                    console.log('WebSocket disconnected, retrying in 5s...');
+                    setTimeout(connectWebSocket, 5000);
+                };
+                
+                ws.onerror = function(error) {
+                    console.log('WebSocket error:', error);
+                };
+            } catch (error) {
+                console.log('WebSocket connection failed:', error);
+                setTimeout(connectWebSocket, 5000);
             }
-        };
+        }
+        
+        connectWebSocket();
         
         function updateDashboard(portfolio) {
             document.getElementById('portfolio-value').textContent = '$' + portfolio.totalValue.toFixed(2);
@@ -173,15 +200,48 @@ class SimpleTradingBot {
         }
         
         function downloadReport() {
-            window.open('/api/download-report', '_blank');
+            fetch('/api/download-report')
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'trading-report.csv';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(error => {
+                    console.log('Download error:', error);
+                    // Fallback to window.open
+                    window.open('/api/download-report', '_blank');
+                });
         }
         
-        // Keep connection alive
+        // Keep connection alive and add error handling
         setInterval(() => {
-            if (ws.readyState === WebSocket.OPEN) {
-                ws.ping();
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({type: 'ping'}));
             }
         }, 30000);
+        
+        // Load initial data via API if WebSocket fails
+        function loadInitialData() {
+            fetch('/api/portfolio')
+                .then(response => response.json())
+                .then(portfolio => {
+                    updateDashboard(portfolio);
+                    console.log('Loaded portfolio via API');
+                })
+                .catch(error => {
+                    console.log('API load error:', error);
+                });
+        }
+        
+        // Load data immediately and refresh periodically
+        loadInitialData();
+        setInterval(loadInitialData, 60000); // Refresh every minute
     </script>
 </body>
 </html>
@@ -210,35 +270,70 @@ class SimpleTradingBot {
         uptime: process.uptime(),
         portfolio: this.portfolio,
         isTrading: this.isRunning,
-        lastDecision: this.tradingHistory[this.tradingHistory.length - 1] || null
+        lastDecision: this.tradingHistory[this.tradingHistory.length - 1] || null,
+        clients: this.clients.size,
+        timestamp: new Date().toISOString()
       });
+    });
+
+    this.app.get('/health', (req, res) => {
+      res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString() });
     });
   }
 
   setupWebSocket() {
-    this.wsServer.on('connection', (ws) => {
+    this.wsServer.on('connection', (ws, request) => {
       this.clients.add(ws);
       console.log('📱 Client connected to dashboard');
       
       // Send current status
-      ws.send(JSON.stringify({
-        type: 'status',
-        portfolio: this.portfolio,
-        isRunning: this.isRunning
-      }));
+      try {
+        ws.send(JSON.stringify({
+          type: 'status',
+          portfolio: this.portfolio,
+          isRunning: this.isRunning
+        }));
+      } catch (error) {
+        console.log('WebSocket send error:', error);
+      }
+
+      ws.on('message', (data) => {
+        try {
+          const message = JSON.parse(data.toString());
+          if (message.type === 'ping') {
+            ws.send(JSON.stringify({type: 'pong'}));
+          }
+        } catch (error) {
+          console.log('WebSocket message parse error:', error);
+        }
+      });
 
       ws.on('close', () => {
         this.clients.delete(ws);
         console.log('📱 Client disconnected');
       });
+
+      ws.on('error', (error) => {
+        console.log('WebSocket client error:', error);
+        this.clients.delete(ws);
+      });
+    });
+
+    this.wsServer.on('error', (error) => {
+      console.log('WebSocket server error:', error);
     });
   }
 
   broadcast(data) {
     const message = JSON.stringify(data);
     this.clients.forEach(client => {
-      if (client.readyState === 1) { // OPEN
-        client.send(message);
+      try {
+        if (client.readyState === 1) { // OPEN
+          client.send(message);
+        }
+      } catch (error) {
+        console.log('Broadcast error:', error);
+        this.clients.delete(client);
       }
     });
   }
@@ -247,18 +342,21 @@ class SimpleTradingBot {
     this.isRunning = true;
     const port = process.env.PORT || 3000;
     
-    this.server.listen(port, () => {
+    this.server.listen(port, '0.0.0.0', () => {
       console.log('🚀 TweetBot Trading System Started!');
       console.log(`📊 Dashboard: http://localhost:${port}`);
       console.log(`💰 Managing $${this.portfolio.totalValue} portfolio`);
       console.log('🤖 4 AI agents active and trading');
       console.log('⏰ Decisions every 30 minutes, prices every 5 minutes');
+      console.log(`🌐 Server listening on port ${port}`);
+      console.log(`🔗 Environment: ${process.env.NODE_ENV || 'development'}`);
     });
 
     // Load existing portfolio if available
     await this.loadPortfolio();
 
     // Start trading loop
+    console.log('🎯 Making initial trading decision...');
     await this.makeDecision(); // Initial decision
     setInterval(() => this.makeDecision(), 30 * 60 * 1000); // Every 30 minutes
     setInterval(() => this.updatePrices(), 5 * 60 * 1000);  // Every 5 minutes
