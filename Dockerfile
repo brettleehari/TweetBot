@@ -15,5 +15,5 @@ COPY . .
 # Expose port
 EXPOSE 3000
 
-# Start the production trading service
-CMD ["node", "--loader", "ts-node/esm", "src/mastra/services/production-trading-service.ts"]
+# Start the enhanced 24/7 trading service with web dashboard
+CMD ["node", "--loader", "ts-node/esm", "enhanced-24x7-trading.ts"]
