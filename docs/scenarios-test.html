@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 BTC Trading Scenarios - TEST</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #f0f0f0; 
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 10px;
+        }
+        .mermaid { 
+            background: white; 
+            border: 1px solid #ddd; 
+            border-radius: 5px; 
+            padding: 20px; 
+            margin: 20px 0; 
+        }
+        .tab { 
+            display: inline-block; 
+            padding: 10px 20px; 
+            background: #007bff; 
+            color: white; 
+            margin: 5px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+        }
+        .tab-content { 
+            border: 1px solid #ddd; 
+            padding: 20px; 
+            margin-top: 20px; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 BTC Expert Trading Scenarios Dashboard</h1>
+        <p><strong>Status:</strong> ✅ Page loaded successfully!</p>
+        
+        <div class="tab">📈 Bull Market</div>
+        <div class="tab">📉 Bear Market</div>
+        <div class="tab">🌊 Range-Bound</div>
+        <div class="tab">🛡️ Risk Management</div>
+        
+        <div class="tab-content">
+            <h2>🚀 Bull Market Strategy</h2>
+            <p>Professional decision tree for uptrending Bitcoin markets:</p>
+            
+            <div class="mermaid">
+                graph TD
+                    A[Bull Market Detected] --> B{Volume Confirmation?}
+                    B -->|High Volume| C[Confirmed Bull Trend]
+                    B -->|Low Volume| D[Weak Bull Signal]
+                    C --> E[Position Size: 2% Risk]
+                    D --> F[Position Size: 1% Risk]
+                    E --> G[Enter Long Position]
+                    F --> G
+                    G --> H[Stop Loss: -2%]
+                    H --> I[Take Profit: +4%]
+                    
+                    style A fill:#e8f5e8
+                    style C fill:#c8e6c9
+                    style G fill:#4caf50
+                    style I fill:#2e7d32
+            </div>
+            
+            <h2>📊 Range-Bound Strategy (Current Market)</h2>
+            <p>Expert approach for sideways markets:</p>
+            
+            <div class="mermaid">
+                graph TD
+                    A[Range-Bound Market] --> B{Range Width?}
+                    B -->|Wide Range >5%| C[Strong Range Trading]
+                    B -->|Narrow Range <2%| D[Avoid Trading]
+                    C --> E[Buy at Support]
+                    C --> F[Sell at Resistance]
+                    E --> G[Stop: Below Support]
+                    F --> H[Stop: Above Resistance]
+                    
+                    style A fill:#fff3e0
+                    style C fill:#ffcc02
+                    style E fill:#ff9800
+            </div>
+            
+            <h2>🏆 Performance Standards</h2>
+            <table border="1" style="width:100%; border-collapse: collapse;">
+                <tr style="background: #f0f0f0;">
+                    <th>Metric</th>
+                    <th>Expert Level</th>
+                    <th>Elite Level</th>
+                </tr>
+                <tr>
+                    <td>Sharpe Ratio</td>
+                    <td>1.0 - 2.0</td>
+                    <td>> 2.0</td>
+                </tr>
+                <tr>
+                    <td>Max Drawdown</td>
+                    <td>5-15%</td>
+                    <td>< 5%</td>
+                </tr>
+                <tr>
+                    <td>Win Rate</td>
+                    <td>50-60%</td>
+                    <td>> 60%</td>
+                </tr>
+            </table>
+            
+            <div style="background: #e8f5e8; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                <strong>💡 Expert Principle:</strong> Professional traders prioritize risk-adjusted returns over absolute gains. A 30% return with 10% max drawdown (Sharpe > 2) is better than 200% return with 70% drawdown.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Mermaid
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true
+            }
+        });
+        
+        console.log('🎯 Trading Scenarios Dashboard loaded');
+        console.log('📊 Mermaid diagrams should be rendering');
+    </script>
+</body>
+</html>

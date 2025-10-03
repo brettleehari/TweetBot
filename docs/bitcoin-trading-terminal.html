@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Trading Dashboard - Terminal Style</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #00ff00;
+            min-height: 100vh;
+            padding: 10px;
+            line-height: 1.3;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+
+        .terminal-dashboard {
+            min-width: 800px;
+            background: #000;
+            border: 2px solid #00ff00;
+            padding: 15px;
+        }
+
+        .ascii-header {
+            text-align: center;
+            color: #00ffff;
+            margin-bottom: 15px;
+            white-space: pre;
+            font-size: 13px;
+        }
+
+        .dashboard-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .box {
+            border: 1px solid #00ff00;
+            padding: 10px;
+            background: #001100;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .box-header {
+            color: #00ffff;
+            font-weight: bold;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+            margin-bottom: 8px;
+        }
+
+        .price-display {
+            font-size: 2em;
+            color: #ffff00;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            font-size: 12px;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 3px 0;
+            font-size: 12px;
+        }
+
+        .chart-container {
+            height: 250px;
+            background: #000;
+            margin: 10px 0;
+        }
+
+        .decision-history {
+            height: 350px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            background: #000011;
+            padding: 8px;
+            font-size: 11px;
+        }
+
+        .decision-entry {
+            border: 1px solid #333;
+            margin: 5px 0;
+            padding: 8px;
+            background: #001a1a;
+        }
+
+        .decision-entry.buy { border-left: 4px solid #00ff00; }
+        .decision-entry.sell { border-left: 4px solid #ff0000; }
+        .decision-entry.neutral { border-left: 4px solid #888; }
+
+        .positive { color: #00ff00; }
+        .negative { color: #ff0000; }
+        .neutral { color: #ffff00; }
+        .info { color: #00ffff; }
+
+        .confidence-bar {
+            width: 80px;
+            height: 6px;
+            background: #333;
+            margin: 2px 0;
+            position: relative;
+            display: inline-block;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(to right, #ff0000, #ffff00, #00ff00);
+        }
+
+        .live-dot {
+            color: #00ff00;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .control-panel {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+
+        .terminal-button {
+            background: #003300;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 5px 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .terminal-button:hover {
+            background: #006600;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px;
+            font-size: 11px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-active { background: #00ff00; }
+        .status-limited { background: #ffaa00; }
+        .status-error { background: #ff0000; }
+
+        .portfolio-breakdown {
+            border: 1px solid #333;
+            padding: 8px;
+            margin: 5px 0;
+            background: #000a0a;
+        }
+
+        .scrollbar::-webkit-scrollbar { width: 6px; }
+        .scrollbar::-webkit-scrollbar-track { background: #000; }
+        .scrollbar::-webkit-scrollbar-thumb { background: #00ff00; border-radius: 3px; }
+
+        @media (max-width: 900px) {
+            .dashboard-row { flex-direction: column; }
+            body { font-size: 12px; }
+            .price-display { font-size: 1.5em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal-dashboard">
+        <!-- ASCII Art Header -->
+        <div class="ascii-header">
+┌─────────────────────────────────────────────────────────────┐
+│                    BITCOIN TRADING DASHBOARD                │
+├─────────────────────────────────────────────────────────────┤
+│  <span class="live-dot">●</span> LIVE TRADING INTELLIGENCE  │  Last Update: <span id="last-update">--:--:--</span>  │
+└─────────────────────────────────────────────────────────────┘
+        </div>
+
+        <!-- Price and Portfolio Row -->
+        <div class="dashboard-row">
+            <!-- Current BTC Price -->
+            <div class="box">
+                <div class="box-header">💰 CURRENT BTC PRICE</div>
+                <div class="price-display" id="current-price">Loading...</div>
+                <div class="metric-grid">
+                    <div class="metric-row">
+                        <span>24h Change:</span>
+                        <span id="price-change" class="neutral">--</span>
+                    </div>
+                    <div class="metric-row">
+                        <span>Volume 24h:</span>
+                        <span id="volume-24h">--</span>
+                    </div>
+                    <div class="metric-row">
+                        <span>Market Cap:</span>
+                        <span id="market-cap">--</span>
+                    </div>
+                    <div class="metric-row">
+                        <span>Dominance:</span>
+                        <span id="btc-dominance">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Portfolio Value -->
+            <div class="box">
+                <div class="box-header">📊 PORTFOLIO STATUS</div>
+                <div class="price-display" id="portfolio-total">$0.00</div>
+                <div class="portfolio-breakdown">
+                    <div class="metric-row">
+                        <span>💵 Cash Balance:</span>
+                        <span id="cash-balance">$0.00</span>
+                    </div>
+                    <div class="metric-row">
+                        <span>₿ BTC Holdings:</span>
+                        <span id="btc-holdings">0.00000000</span>
+                    </div>
+                    <div class="metric-row">
+                        <span>📈 BTC Value:</span>
+                        <span id="btc-value">$0.00</span>
+                    </div>
+                    <div style="border-top: 1px solid #333; margin-top: 5px; padding-top: 5px;">
+                        <div class="metric-row">
+                            <span>Initial Capital:</span>
+                            <span>$10,000.00</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>P&L:</span>
+                            <span id="profit-loss" class="neutral">$0.00 (0.00%)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Row -->
+        <div class="dashboard-row">
+            <div class="box" style="flex: 2;">
+                <div class="box-header">📈 PORTFOLIO VALUE CHART (7 Days)</div>
+                <div class="chart-container">
+                    <canvas id="portfolioChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Row: Decision History and System Status -->
+        <div class="dashboard-row">
+            <!-- Decision History -->
+            <div class="box" style="flex: 2;">
+                <div class="box-header">🤖 DECISION HISTORY (Scrollable)</div>
+                <div class="decision-history scrollbar" id="decision-history">
+                    <div class="live-dot">Loading decision history...</div>
+                </div>
+            </div>
+
+            <!-- System Status and Controls -->
+            <div class="box">
+                <div class="box-header">⚡ SYSTEM STATUS</div>
+                <div class="status-grid" id="agent-status">
+                    <div class="live-dot">Loading...</div>
+                </div>
+
+                <div class="box-header" style="margin-top: 15px;">📊 MARKET INDICATORS</div>
+                <div class="metric-grid" id="market-indicators">
+                    <div class="metric-row">
+                        <span>RSI (14):</span>
+                        <span id="rsi-indicator" class="neutral">--</span>
+                    </div>
+                    <div class="metric-row">
+                        <span>MACD:</span>
+                        <span id="macd-indicator" class="neutral">--</span>
+                    </div>
+                    <div class="metric-row">
+                        <span>Trend:</span>
+                        <span id="trend-indicator" class="neutral">--</span>
+                    </div>
+                    <div class="metric-row">
+                        <span>Sentiment:</span>
+                        <span id="sentiment-indicator" class="neutral">--</span>
+                    </div>
+                </div>
+
+                <div class="box-header" style="margin-top: 15px;">🎛️ CONTROLS</div>
+                <div class="control-panel">
+                    <button class="terminal-button" onclick="refreshData()">🔄 Refresh</button>
+                    <button class="terminal-button" onclick="generateContent()">✍️ Content</button>
+                    <button class="terminal-button" onclick="toggleAutoRefresh()">⏰ Auto: <span id="auto-status">ON</span></button>
+                    <button class="terminal-button" onclick="exportData()">💾 Export</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let autoRefreshEnabled = true;
+        let refreshInterval;
+        let portfolioChart;
+        let portfolioData = {
+            cash: 3200.00,
+            btc: 0.07250000,
+            totalValue: 0,
+            initialCapital: 10000
+        };
+        let currentBtcPrice = 0;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeChart();
+            refreshData();
+            startAutoRefresh();
+        });
+
+        // Initialize Chart.js
+        function initializeChart() {
+            const ctx = document.getElementById('portfolioChart').getContext('2d');
+            portfolioChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Portfolio Value',
+                        data: [],
+                        borderColor: '#00ff00',
+                        backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                        tension: 0.4,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#00ff00'
+                    }, {
+                        label: 'Initial Capital ($10,000)',
+                        data: [],
+                        borderColor: '#ff0000',
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                        tension: 0
+                    }, {
+                        label: '10% Goal ($11,000)',
+                        data: [],
+                        borderColor: '#00aaff',
+                        borderDash: [3, 3],
+                        pointRadius: 0,
+                        tension: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#00ff00',
+                                font: { size: 10 }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { 
+                                color: '#00ff00',
+                                font: { size: 9 }
+                            },
+                            grid: { color: '#003300' }
+                        },
+                        y: {
+                            ticks: { 
+                                color: '#00ff00',
+                                font: { size: 9 },
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            },
+                            grid: { color: '#003300' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Main refresh function
+        async function refreshData() {
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+            
+            await Promise.all([
+                loadPriceData(),
+                loadPortfolioData(),
+                loadAgentStatus(),
+                loadDecisionHistory(),
+                loadMarketIndicators()
+            ]);
+        }
+
+        // Load Bitcoin price data
+        async function loadPriceData() {
+            try {
+                const response = await fetch('/api/bitcoin-price');
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentBtcPrice = data.data.price;
+                    const change24h = data.data.change24h || 0;
+                    
+                    document.getElementById('current-price').textContent = 
+                        `$${currentBtcPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                    
+                    const changeEl = document.getElementById('price-change');
+                    changeEl.textContent = `${change24h >= 0 ? '+' : ''}${change24h.toFixed(2)}%`;
+                    changeEl.className = change24h >= 0 ? 'positive' : 'negative';
+                    
+                    // Mock additional market data
+                    document.getElementById('volume-24h').textContent = '$2.1B';
+                    document.getElementById('market-cap').textContent = '$2.2T';
+                    document.getElementById('btc-dominance').textContent = '54.2%';
+                    
+                    updatePortfolioValue();
+                }
+            } catch (error) {
+                document.getElementById('current-price').textContent = 'ERROR';
+                document.getElementById('current-price').className = 'negative';
+            }
+        }
+
+        // Load and update portfolio data
+        function loadPortfolioData() {
+            updatePortfolioValue();
+            updatePortfolioChart();
+        }
+
+        // Update portfolio calculations
+        function updatePortfolioValue() {
+            const btcValue = portfolioData.btc * currentBtcPrice;
+            portfolioData.totalValue = portfolioData.cash + btcValue;
+            const profitLoss = portfolioData.totalValue - portfolioData.initialCapital;
+            const profitLossPercent = (profitLoss / portfolioData.initialCapital) * 100;
+
+            document.getElementById('portfolio-total').textContent = 
+                `$${portfolioData.totalValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('cash-balance').textContent = `$${portfolioData.cash.toFixed(2)}`;
+            document.getElementById('btc-holdings').textContent = portfolioData.btc.toFixed(8);
+            document.getElementById('btc-value').textContent = `$${btcValue.toFixed(2)}`;
+            
+            const plEl = document.getElementById('profit-loss');
+            plEl.textContent = `${profitLoss >= 0 ? '+' : ''}$${profitLoss.toFixed(2)} (${profitLoss >= 0 ? '+' : ''}${profitLossPercent.toFixed(2)}%)`;
+            plEl.className = profitLoss >= 0 ? 'positive' : 'negative';
+        }
+
+        // Update portfolio chart
+        function updatePortfolioChart() {
+            const now = Date.now();
+            const labels = [];
+            const portfolioValues = [];
+            const baselineValues = [];
+            const goalValues = [];
+            
+            // Generate 7 days of mock historical data (every 6 hours = 28 points)
+            for (let i = 28; i >= 0; i--) {
+                const timestamp = now - (i * 6 * 3600000);
+                const date = new Date(timestamp);
+                labels.push(date.getMonth() + 1 + '/' + date.getDate() + ' ' + date.getHours() + ':00');
+                
+                // Mock portfolio progression with some realistic variations
+                const baseValue = portfolioData.initialCapital;
+                const trend = (28 - i) * 20; // Gradual upward trend
+                const volatility = Math.sin(i / 4) * 200 + Math.random() * 100; // Some volatility
+                const currentValue = i === 0 ? portfolioData.totalValue : baseValue + trend + volatility;
+                
+                portfolioValues.push(Math.max(currentValue, 9000)); // Don't go too low
+                baselineValues.push(10000);
+                goalValues.push(11000);
+            }
+            
+            portfolioChart.data.labels = labels;
+            portfolioChart.data.datasets[0].data = portfolioValues;
+            portfolioChart.data.datasets[1].data = baselineValues;
+            portfolioChart.data.datasets[2].data = goalValues;
+            portfolioChart.update();
+        }
+
+        // Load agent status
+        async function loadAgentStatus() {
+            try {
+                const response = await fetch('/api/agent-status');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const statusHtml = Object.entries(data.data).map(([key, agent]) => {
+                        const statusClass = agent.status === 'active' ? 'status-active' : 
+                                          agent.status === 'limited' ? 'status-limited' : 'status-error';
+                        return `<div class="status-item">
+                            <div class="status-dot ${statusClass}"></div>
+                            <span>${agent.name}</span>
+                        </div>`;
+                    }).join('');
+                    document.getElementById('agent-status').innerHTML = statusHtml;
+                }
+            } catch (error) {
+                document.getElementById('agent-status').innerHTML = 
+                    '<div class="status-item"><div class="status-dot status-error"></div><span>System Error</span></div>';
+            }
+        }
+
+        // Load decision history with detailed entries
+        function loadDecisionHistory() {
+            const mockDecisions = [
+                {
+                    timestamp: new Date(Date.now() - 1800000), // 30 mins ago
+                    action: 'BUY',
+                    confidence: 87,
+                    entryPrice: 67340,
+                    amount: 0.03720000,
+                    reasoning: 'RSI oversold (28) + Whale accumulation detected',
+                    signals: [
+                        '✅ Technical: RSI at 28 (oversold) + MACD bullish divergence',
+                        '✅ On-chain: 6.2k BTC net outflow from exchanges (whale accumulation)',
+                        '✅ Derivatives: Funding rate -0.015% (shorts paying longs)',
+                        '✅ Sentiment: Fear & Greed at 22 (extreme fear - good for buying)'
+                    ],
+                    confluence: '4/4 categories aligned',
+                    riskReward: '4.2:1'
+                },
+                {
+                    timestamp: new Date(Date.now() - 3600000), // 1 hour ago
+                    action: 'NEUTRAL',
+                    confidence: 65,
+                    reasoning: 'Mixed signals detected - waiting for stronger confluence',
+                    signals: [
+                        '• Technical: RSI at 45 (neutral zone)',
+                        '• On-chain: Positive (slight accumulation)',
+                        '• Derivatives: Neutral funding rate',
+                        '• Sentiment: Neutral (Fear & Greed at 52)'
+                    ],
+                    confluence: 'Confidence below 80% threshold'
+                },
+                {
+                    timestamp: new Date(Date.now() - 5400000), // 1.5 hours ago
+                    action: 'NEUTRAL',
+                    confidence: 62,
+                    reasoning: 'Waiting for better entry opportunity',
+                    signals: [
+                        '• RSI in neutral zone (45-55)',
+                        '• No strong momentum signals',
+                        '• Mixed on-chain metrics'
+                    ]
+                }
+            ];
+
+            const historyHtml = mockDecisions.map(decision => {
+                const actionClass = decision.action.toLowerCase();
+                const actionEmoji = decision.action === 'BUY' ? '🟢' : 
+                                  decision.action === 'SELL' ? '🔴' : '⚪';
+                const confidenceClass = decision.confidence >= 80 ? 'positive' : 
+                                      decision.confidence >= 60 ? 'neutral' : 'negative';
+
+                let tradeDetails = '';
+                if (decision.entryPrice) {
+                    tradeDetails = `
+                        <div style="border-top: 1px solid #333; margin: 5px 0; padding-top: 5px;">
+                            <div style="font-weight: bold;">Trade Details:</div>
+                            <div>• Entry Price: $${decision.entryPrice.toLocaleString()}</div>
+                            <div>• Amount: ${decision.amount.toFixed(8)} BTC ($${(decision.amount * decision.entryPrice).toFixed(2)})</div>
+                            <div>• New Holdings: ${portfolioData.btc.toFixed(8)} BTC</div>
+                            <div>• Remaining Cash: $${portfolioData.cash.toFixed(2)}</div>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="decision-entry ${actionClass}">
+                        <div style="display: flex; justify-content: space-between; font-weight: bold;">
+                            <span>${actionEmoji} ${decision.action}</span>
+                            <span class="info">${decision.timestamp.toLocaleString()}</span>
+                        </div>
+                        <div style="margin: 3px 0;">
+                            Confidence: <span class="${confidenceClass}">${decision.confidence}%</span>
+                        </div>
+                        ${tradeDetails}
+                        <div style="margin: 5px 0;">
+                            <div style="font-weight: bold;">Reasoning:</div>
+                            <div>${decision.reasoning}</div>
+                        </div>
+                        ${decision.signals ? `
+                            <div style="margin: 5px 0; font-size: 10px;">
+                                ${decision.signals.map(signal => `<div>${signal}</div>`).join('')}
+                            </div>
+                        ` : ''}
+                        ${decision.confluence ? `
+                            <div style="margin: 3px 0; font-style: italic; color: #888;">
+                                ${decision.confluence}${decision.riskReward ? ` | Risk/Reward: ${decision.riskReward}` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('decision-history').innerHTML = historyHtml;
+        }
+
+        // Load market indicators
+        function loadMarketIndicators() {
+            // Mock market data with realistic values
+            document.getElementById('rsi-indicator').textContent = '28.5';
+            document.getElementById('rsi-indicator').className = 'positive'; // Oversold is good
+            
+            document.getElementById('macd-indicator').textContent = 'Bullish';
+            document.getElementById('macd-indicator').className = 'positive';
+            
+            document.getElementById('trend-indicator').textContent = 'Upward';
+            document.getElementById('trend-indicator').className = 'positive';
+            
+            document.getElementById('sentiment-indicator').textContent = 'Fear (22)';
+            document.getElementById('sentiment-indicator').className = 'positive'; // Fear is good for buying
+        }
+
+        // Auto refresh functionality
+        function startAutoRefresh() {
+            if (refreshInterval) clearInterval(refreshInterval);
+            refreshInterval = setInterval(refreshData, 30000); // Every 30 seconds
+        }
+
+        function toggleAutoRefresh() {
+            autoRefreshEnabled = !autoRefreshEnabled;
+            document.getElementById('auto-status').textContent = autoRefreshEnabled ? 'ON' : 'OFF';
+            
+            if (autoRefreshEnabled) {
+                startAutoRefresh();
+            } else {
+                clearInterval(refreshInterval);
+            }
+        }
+
+        // Generate content function
+        async function generateContent() {
+            try {
+                const response = await fetch('/api/generate-content');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const content = data.data;
+                    const popup = `
+Content Generated Successfully!
+
+Daily Summary:
+${content.dailySummary}
+
+Price Alert:
+${content.priceAlert}
+
+Market Insight:
+${content.marketInsight}
+                    `;
+                    alert(popup);
+                }
+            } catch (error) {
+                alert('Error generating content. Please check the connection.');
+            }
+        }
+
+        // Export data function
+        function exportData() {
+            const exportData = {
+                timestamp: new Date().toISOString(),
+                portfolio: portfolioData,
+                btcPrice: currentBtcPrice,
+                performance: {
+                    initialCapital: portfolioData.initialCapital,
+                    currentValue: portfolioData.totalValue,
+                    profitLoss: portfolioData.totalValue - portfolioData.initialCapital,
+                    profitLossPercent: ((portfolioData.totalValue - portfolioData.initialCapital) / portfolioData.initialCapital * 100).toFixed(2)
+                }
+            };
+            
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `bitcoin-trading-dashboard-${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>

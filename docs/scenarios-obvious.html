@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🟢 TABS WORKING - Scenarios Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .mega-header {
+            text-align: center;
+            background: rgba(0,0,0,0.8);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border: 5px solid #fff;
+        }
+        
+        .mega-header h1 {
+            font-size: 4rem;
+            margin: 0;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.7);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+            padding: 15px;
+            border: 3px solid #fff;
+        }
+        
+        .nav-tab {
+            padding: 15px 30px;
+            margin: 0 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        
+        .nav-tab:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+        
+        .nav-tab.active {
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            transform: scale(1.1);
+        }
+        
+        .tab-content {
+            display: none;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 20px;
+            border: 3px solid #fff;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .tab-content h2 {
+            color: #ff416c;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .success-message {
+            background: linear-gradient(45deg, #4caf50, #45a049);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .warning-box {
+            background: linear-gradient(45deg, #ff9800, #f57c00);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 5px solid #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="mega-header">
+        <h1>🟢 THIS IS THE SCENARIOS PAGE WITH TABS! 🟢</h1>
+        <p style="font-size: 1.5rem;">If you see this page, the routing is working! The tabs below should be clickable.</p>
+    </div>
+
+    <div class="nav-tabs">
+        <button class="nav-tab active" onclick="showTab('bull-scenarios')">📈 Bull Market</button>
+        <button class="nav-tab" onclick="showTab('bear-scenarios')">📉 Bear Market</button>
+        <button class="nav-tab" onclick="showTab('range-scenarios')">🌊 Range-Bound</button>
+        <button class="nav-tab" onclick="showTab('risk-management')">🛡️ Risk Management</button>
+        <button class="nav-tab" onclick="showTab('position-sizing')">📊 Position Sizing</button>
+        <button class="nav-tab" onclick="showTab('performance')">🏆 Performance</button>
+    </div>
+
+    <!-- Tab Contents -->
+    <div id="bull-scenarios" class="tab-content active">
+        <h2>📈 Bull Market Strategies</h2>
+        <div class="success-message">
+            ✅ SUCCESS! You are seeing the Bull Market tab content. Tab switching is working!
+        </div>
+        <div class="warning-box">
+            <strong>Test:</strong> Click other tabs above to see if the content changes.
+        </div>
+        <ul style="font-size: 1.2rem;">
+            <li>Trend-following strategies with volume confirmation</li>
+            <li>Position size: 2% risk maximum</li>
+            <li>RSI levels determine entry timing</li>
+            <li>Stop loss: -2% for confirmed trends</li>
+        </ul>
+    </div>
+
+    <div id="bear-scenarios" class="tab-content">
+        <h2>📉 Bear Market Strategies</h2>
+        <div class="success-message">
+            ✅ SUCCESS! You are seeing the Bear Market tab content. This tab works!
+        </div>
+        <div class="warning-box">
+            <strong>Test:</strong> If you can see this, the Bear Market tab was clicked successfully.
+        </div>
+        <ul style="font-size: 1.2rem;">
+            <li>Capital preservation and selective short opportunities</li>
+            <li>Extreme volatility requires minimal position sizes</li>
+            <li>Tight risk control essential</li>
+        </ul>
+    </div>
+
+    <div id="range-scenarios" class="tab-content">
+        <h2>🌊 Range-Bound Strategies</h2>
+        <div class="success-message">
+            ✅ SUCCESS! You are seeing the Range-Bound tab content. This tab works!
+        </div>
+        <div class="warning-box">
+            <strong>Test:</strong> If you can see this, the Range-Bound tab was clicked successfully.
+        </div>
+        <ul style="font-size: 1.2rem;">
+            <li>Mean reversion strategies for sideways markets</li>
+            <li>Buy support, sell resistance</li>
+            <li>Range width determines probability</li>
+        </ul>
+    </div>
+
+    <div id="risk-management" class="tab-content">
+        <h2>🛡️ Risk Management</h2>
+        <div class="success-message">
+            ✅ SUCCESS! You are seeing the Risk Management tab content. This tab works!
+        </div>
+        <div class="warning-box">
+            <strong>Test:</strong> If you can see this, the Risk Management tab was clicked successfully.
+        </div>
+        <ul style="font-size: 1.2rem;">
+            <li>Drawdown control and position sizing rules</li>
+            <li>Maximum 2% risk per trade</li>
+            <li>Emergency stop protocols</li>
+        </ul>
+    </div>
+
+    <div id="position-sizing" class="tab-content">
+        <h2>📊 Position Sizing</h2>
+        <div class="success-message">
+            ✅ SUCCESS! You are seeing the Position Sizing tab content. This tab works!
+        </div>
+        <div class="warning-box">
+            <strong>Test:</strong> If you can see this, the Position Sizing tab was clicked successfully.
+        </div>
+        <ul style="font-size: 1.2rem;">
+            <li>Mathematical position size calculations</li>
+            <li>Risk Amount ÷ (Entry Price - Stop Loss)</li>
+            <li>Account for leverage restrictions</li>
+        </ul>
+    </div>
+
+    <div id="performance" class="tab-content">
+        <h2>🏆 Performance Metrics</h2>
+        <div class="success-message">
+            ✅ SUCCESS! You are seeing the Performance tab content. This tab works!
+        </div>
+        <div class="warning-box">
+            <strong>Test:</strong> If you can see this, the Performance tab was clicked successfully.
+        </div>
+        <ul style="font-size: 1.2rem;">
+            <li>Professional benchmark metrics</li>
+            <li>Sharpe Ratio > 1.5 target</li>
+            <li>Maximum drawdown < 15%</li>
+            <li>Profit factor > 1.5</li>
+        </ul>
+    </div>
+
+    <script>
+        function showTab(tabId) {
+            console.log('🔄 Switching to tab:', tabId);
+            
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all nav tabs
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) {
+                targetTab.classList.add('active');
+                console.log('✅ Successfully activated tab:', tabId);
+            } else {
+                console.error('❌ Tab not found:', tabId);
+                return;
+            }
+            
+            // Find and activate the corresponding nav tab
+            navTabs.forEach(tab => {
+                const onclickAttr = tab.getAttribute('onclick');
+                if (onclickAttr && onclickAttr.includes(tabId)) {
+                    tab.classList.add('active');
+                }
+            });
+        }
+
+        // Show current page info
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🟢 SCENARIOS PAGE LOADED WITH TABS!');
+            console.log('Current URL:', window.location.href);
+            console.log('Page title:', document.title);
+        });
+    </script>
+</body>
+</html>

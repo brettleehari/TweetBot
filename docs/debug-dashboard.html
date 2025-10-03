@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 Tab Diagnostic - Debug Version</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 10px;
+        }
+        
+        .nav-tab {
+            padding: 12px 24px;
+            margin: 0 5px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tab:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .nav-tab.active {
+            background: #4CAF50;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+        
+        .tab-content {
+            display: none;
+            background: white;
+            color: black;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .debug-panel {
+            background: rgba(0,0,0,0.8);
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .debug-panel h4 {
+            color: #ffff00;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 BTC Expert Trading Scenarios - Debug Version</h1>
+        
+        <div class="debug-panel">
+            <h4>🔍 Real-Time Debug Log</h4>
+            <div id="debug-log">Initializing...</div>
+        </div>
+        
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('bull-scenarios')">📈 Bull Market</button>
+            <button class="nav-tab" onclick="showTab('bear-scenarios')">📉 Bear Market</button>
+            <button class="nav-tab" onclick="showTab('range-scenarios')">🌊 Range-Bound</button>
+            <button class="nav-tab" onclick="showTab('risk-management')">🛡️ Risk Management</button>
+            <button class="nav-tab" onclick="showTab('position-sizing')">📊 Position Sizing</button>
+            <button class="nav-tab" onclick="showTab('performance')">🏆 Performance</button>
+        </div>
+
+        <!-- Tab Contents -->
+        <div id="bull-scenarios" class="tab-content active">
+            <h2>📈 Bull Market Strategies</h2>
+            <p><strong>Status:</strong> This tab should be visible by default</p>
+            <ul>
+                <li>Trend-following strategies with volume confirmation</li>
+                <li>Position size: 2% risk maximum</li>
+                <li>RSI levels determine entry timing</li>
+                <li>Stop loss: -2% for confirmed trends</li>
+            </ul>
+        </div>
+
+        <div id="bear-scenarios" class="tab-content">
+            <h2>📉 Bear Market Strategies</h2>
+            <p><strong>Status:</strong> This tab should appear when Bear Market is clicked</p>
+            <ul>
+                <li>Capital preservation and selective short opportunities</li>
+                <li>Extreme volatility requires minimal position sizes</li>
+                <li>Tight risk control essential</li>
+            </ul>
+        </div>
+
+        <div id="range-scenarios" class="tab-content">
+            <h2>🌊 Range-Bound Strategies</h2>
+            <p><strong>Status:</strong> This tab should appear when Range-Bound is clicked</p>
+            <ul>
+                <li>Mean reversion strategies for sideways markets</li>
+                <li>Buy support, sell resistance</li>
+                <li>Range width determines probability</li>
+            </ul>
+        </div>
+
+        <div id="risk-management" class="tab-content">
+            <h2>🛡️ Risk Management</h2>
+            <p><strong>Status:</strong> This tab should appear when Risk Management is clicked</p>
+            <ul>
+                <li>Drawdown control and position sizing rules</li>
+                <li>Maximum 2% risk per trade</li>
+                <li>Emergency stop protocols</li>
+            </ul>
+        </div>
+
+        <div id="position-sizing" class="tab-content">
+            <h2>📊 Position Sizing</h2>
+            <p><strong>Status:</strong> This tab should appear when Position Sizing is clicked</p>
+            <ul>
+                <li>Mathematical position size calculations</li>
+                <li>Risk Amount ÷ (Entry Price - Stop Loss)</li>
+                <li>Account for leverage restrictions</li>
+            </ul>
+        </div>
+
+        <div id="performance" class="tab-content">
+            <h2>🏆 Performance Metrics</h2>
+            <p><strong>Status:</strong> This tab should appear when Performance is clicked</p>
+            <ul>
+                <li>Professional benchmark metrics</li>
+                <li>Sharpe Ratio > 1.5 target</li>
+                <li>Maximum drawdown < 15%</li>
+                <li>Profit factor > 1.5</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Debug logging function
+        function debugLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logDiv = document.getElementById('debug-log');
+            logDiv.innerHTML += `<br>[${timestamp}] ${message}`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log('[DEBUG]', message);
+        }
+
+        // Enhanced tab switching with debug
+        function showTab(tabId) {
+            debugLog(`🔄 showTab() called with: "${tabId}"`);
+            
+            try {
+                // Hide all tab contents
+                const tabContents = document.querySelectorAll('.tab-content');
+                debugLog(`📋 Found ${tabContents.length} tab content elements`);
+                
+                tabContents.forEach((tab, index) => {
+                    if (tab.classList.contains('active')) {
+                        debugLog(`🔸 Hiding previously active tab: ${tab.id}`);
+                    }
+                    tab.classList.remove('active');
+                });
+                
+                // Remove active class from all nav tabs
+                const navTabs = document.querySelectorAll('.nav-tab');
+                debugLog(`🔘 Found ${navTabs.length} nav tab elements`);
+                
+                navTabs.forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                // Show selected tab content
+                const targetTab = document.getElementById(tabId);
+                if (targetTab) {
+                    targetTab.classList.add('active');
+                    debugLog(`✅ Successfully activated tab: "${tabId}"`);
+                } else {
+                    debugLog(`❌ ERROR: Tab "${tabId}" not found in DOM`);
+                    return;
+                }
+                
+                // Find and activate the corresponding nav tab
+                let buttonActivated = false;
+                navTabs.forEach(tab => {
+                    const onclickAttr = tab.getAttribute('onclick');
+                    if (onclickAttr && onclickAttr.includes(tabId)) {
+                        tab.classList.add('active');
+                        buttonActivated = true;
+                        debugLog(`✅ Activated nav button for: "${tabId}"`);
+                    }
+                });
+                
+                if (!buttonActivated) {
+                    debugLog(`⚠️ WARNING: No nav button found for tab: "${tabId}"`);
+                }
+                
+                debugLog(`🎯 Tab switch to "${tabId}" completed successfully`);
+                
+            } catch (error) {
+                debugLog(`💥 ERROR in showTab(): ${error.message}`);
+                console.error('Tab switching error:', error);
+            }
+        }
+
+        // Page load diagnostics
+        window.addEventListener('load', function() {
+            debugLog('🚀 Page loaded, running diagnostics...');
+            
+            const expectedTabs = ['bull-scenarios', 'bear-scenarios', 'range-scenarios', 'risk-management', 'position-sizing', 'performance'];
+            
+            expectedTabs.forEach(tabId => {
+                const tabContent = document.getElementById(tabId);
+                const navButton = document.querySelector(`[onclick*="${tabId}"]`);
+                
+                if (tabContent) {
+                    debugLog(`✅ Tab content found: "${tabId}"`);
+                } else {
+                    debugLog(`❌ Missing tab content: "${tabId}"`);
+                }
+                
+                if (navButton) {
+                    debugLog(`✅ Nav button found: "${tabId}"`);
+                } else {
+                    debugLog(`❌ Missing nav button: "${tabId}"`);
+                }
+            });
+            
+            debugLog('🔍 Diagnostics complete. Try clicking different tabs now.');
+        });
+
+        // Test function available in console
+        window.testTabs = function() {
+            debugLog('🧪 Starting automatic tab test...');
+            const tabs = ['bull-scenarios', 'bear-scenarios', 'range-scenarios', 'risk-management', 'position-sizing', 'performance'];
+            let currentIndex = 0;
+            
+            function nextTab() {
+                if (currentIndex < tabs.length) {
+                    const tabId = tabs[currentIndex];
+                    debugLog(`🧪 Testing tab ${currentIndex + 1}/6: "${tabId}"`);
+                    showTab(tabId);
+                    currentIndex++;
+                    setTimeout(nextTab, 2000);
+                } else {
+                    debugLog('✅ All tabs tested! Returning to first tab.');
+                    showTab('bull-scenarios');
+                }
+            }
+            
+            nextTab();
+        };
+    </script>
+</body>
+</html>
