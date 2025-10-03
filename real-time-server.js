@@ -12,7 +12,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const port = 4000;
+const port = process.env.PORT || 4000; // Use Railway's dynamic port or fallback to 4000
 const db = new DatabaseService();
 
 // Serve static files from public directory
@@ -237,25 +237,40 @@ app.get('/api/execution-progress', async (req, res) => {
 // Content Generation API (using real-time data)
 app.get('/api/generate-content', async (req, res) => {
   try {
-    // Get real-time data first
-    const [priceData, newsData, analysisData] = await Promise.all([
-      axios.get(`http://localhost:${port}/api/bitcoin-price`),
-      axios.get(`http://localhost:${port}/api/bitcoin-news`),
-      axios.get(`http://localhost:${port}/api/market-analysis`)
+    // Get real-time data directly instead of self-referencing API calls
+    const [priceResponse, analysisResponse] = await Promise.all([
+      axios.get('https://api.coingecko.com/api/v3/simple/price', {
+        params: {
+          ids: 'bitcoin',
+          vs_currencies: 'usd',
+          include_24hr_change: true,
+          include_market_cap: true,
+          include_24hr_vol: true
+        }
+      }),
+      axios.get('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart', {
+        params: {
+          vs_currency: 'usd',
+          days: 1
+        }
+      })
     ]);
     
-    const price = priceData.data.data;
-    const news = newsData.data.data.slice(0, 3);
-    const analysis = analysisData.data.data;
+    const price = priceResponse.data.bitcoin;
+    const historicalData = analysisResponse.data;
+    
+    // Calculate simple analysis
+    const prices = historicalData.prices.map(p => p[1]);
+    const avgPrice = prices.reduce((a, b) => a + b, 0) / prices.length;
     
     // Generate content based on real data
     const content = {
-      dailySummary: `Bitcoin is trading at $${price.price.toLocaleString()} (${price.change24h > 0 ? '+' : ''}${price.change24h.toFixed(2)}% in 24h). Market sentiment is ${analysis.trend} with ${analysis.volatility} volatility.`,
-      priceAlert: price.change24h > 5 ? `🚀 Bitcoin surged ${price.change24h.toFixed(2)}% to $${price.price.toLocaleString()}!` :
-                  price.change24h < -5 ? `📉 Bitcoin dropped ${Math.abs(price.change24h).toFixed(2)}% to $${price.price.toLocaleString()}` :
-                  `📊 Bitcoin stable at $${price.price.toLocaleString()} (${price.change24h > 0 ? '+' : ''}${price.change24h.toFixed(2)}%)`,
-      marketInsight: `Current price of $${price.price.toLocaleString()} is ${price.price > analysis.movingAverage24h ? 'above' : 'below'} the 24h moving average of $${analysis.movingAverage24h.toFixed(0)}. Trading volume: $${(analysis.volume24h / 1e9).toFixed(1)}B`,
-      topNews: news.map(article => `• ${article.title}`).join('\\n'),
+      dailySummary: `Bitcoin is trading at $${price.usd.toLocaleString()} (${price.usd_24h_change > 0 ? '+' : ''}${price.usd_24h_change.toFixed(2)}% in 24h). Market volatility is ${Math.abs(price.usd_24h_change) > 5 ? 'high' : 'moderate'}.`,
+      priceAlert: price.usd_24h_change > 5 ? `🚀 Bitcoin surged ${price.usd_24h_change.toFixed(2)}% to $${price.usd.toLocaleString()}!` :
+                  price.usd_24h_change < -5 ? `📉 Bitcoin dropped ${Math.abs(price.usd_24h_change).toFixed(2)}% to $${price.usd.toLocaleString()}` :
+                  `📊 Bitcoin stable at $${price.usd.toLocaleString()} (${price.usd_24h_change > 0 ? '+' : ''}${price.usd_24h_change.toFixed(2)}%)`,
+      marketInsight: `Current price of $${price.usd.toLocaleString()} is ${price.usd > avgPrice ? 'above' : 'below'} the 24h average of $${avgPrice.toFixed(0)}. Trading volume: $${(price.usd_24h_vol / 1e9).toFixed(1)}B`,
+      topNews: 'Real-time news integration available via NEWS_API_KEY',
       timestamp: new Date().toISOString()
     };
     
@@ -475,20 +490,23 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'docs', 'index.html'));
 });
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`🤖 Bitcoin Intelligence Agent API running on port ${port}`);
-  console.log(`📊 Dashboard available at http://localhost:${port}`);
+  console.log(`📊 Dashboard available`);
   console.log(`🔗 API endpoints:`);
-  console.log(`   - http://localhost:${port}/api/bitcoin-price`);
-  console.log(`   - http://localhost:${port}/api/bitcoin-news`);
-  console.log(`   - http://localhost:${port}/api/market-analysis`);
-  console.log(`   - http://localhost:${port}/api/agent-status`);
-  console.log(`   - http://localhost:${port}/api/performance`);
-  console.log(`   - http://localhost:${port}/api/agent-logs`);
-  console.log(`   - http://localhost:${port}/api/generate-content`);
-  console.log(`   - http://localhost:${port}/api/health`);
+  console.log(`   - /api/bitcoin-price`);
+  console.log(`   - /api/bitcoin-news`);
+  console.log(`   - /api/market-analysis`);
+  console.log(`   - /api/agent-status`);
+  console.log(`   - /api/performance`);
+  console.log(`   - /api/agent-logs`);
+  console.log(`   - /api/generate-content`);
+  console.log(`   - /api/health`);
   console.log(`\\n🌐 Real-time data sources:`);
   console.log(`   - CoinGecko API (price & market data)`);
   console.log(`   - NewsAPI (Bitcoin news feed)`);
   console.log(`\\n✅ All systems ready for real-time Bitcoin intelligence!`);
+}).on('error', (err) => {
+  console.error('❌ Server failed to start:', err);
+  process.exit(1);
 });
