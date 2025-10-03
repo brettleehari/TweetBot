@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 BTC Expert Trading Scenarios - Visualization Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <script>
+        // Debug function
+        function debugMermaid(message, data = null) {
+            console.log('[Mermaid Debug]', message, data);
+        }
+        
+        // Check if Mermaid loaded
+        window.addEventListener('load', function() {
+            if (typeof mermaid === 'undefined') {
+                console.error('Mermaid failed to load from CDN');
+                document.body.innerHTML = '<div style="text-align: center; padding: 50px; color: red;"><h2>Error: Mermaid library failed to load</h2><p>Please check your internet connection and refresh the page.</p></div>';
+            } else {
+                debugMermaid('Mermaid library loaded successfully', mermaid.version || 'Version unknown');
+            }
+        });
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            margin: 0 5px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-tab:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .nav-tab.active {
+            background: #4CAF50;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .scenario-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .scenario-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            border-left: 5px solid #4CAF50;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .scenario-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .mermaid {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: auto;
+        }
+        
+        .mermaid svg {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .mermaid pre {
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-align: left;
+        }
+
+        .metrics-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .metrics-table th,
+        .metrics-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .metrics-table th {
+            background: #34495e;
+            color: white;
+            font-weight: 600;
+        }
+
+        .metrics-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .expert-badge {
+            background: #e74c3c;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .elite-badge {
+            background: #9b59b6;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .info-panel {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .info-panel h4 {
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .live-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2ecc71;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            z-index: 1000;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .expert-principle {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #fdcb6e;
+        }
+    </style>
+</head>
+<body>
+    <div class="live-status">🟢 EXPERT SYSTEM LIVE</div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🎯 BTC Expert Trading Scenarios</h1>
+            <p>Professional-Level Decision Trees & Risk Management Visualizations</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('bull-scenarios')">📈 Bull Market</button>
+            <button class="nav-tab" onclick="showTab('bear-scenarios')">📉 Bear Market</button>
+            <button class="nav-tab" onclick="showTab('range-scenarios')">🌊 Range-Bound</button>
+            <button class="nav-tab" onclick="showTab('risk-management')">🛡️ Risk Management</button>
+            <button class="nav-tab" onclick="showTab('position-sizing')">📊 Position Sizing</button>
+            <button class="nav-tab" onclick="showTab('performance')">🏆 Performance</button>
+        </div>
+
+        <!-- Bull Market Scenarios -->
+        <div id="bull-scenarios" class="tab-content active">
+            <div class="info-panel">
+                <h4>🚀 Bull Market Expert Strategy</h4>
+                <p>When trending upward with volume confirmation, experts use trend-following strategies with proper risk controls.</p>
+            </div>
+            
+            <div class="scenario-card">
+                <h3>Bull Market Decision Tree</h3>
+                <div class="mermaid">
+                    graph TD
+                        A[Bull Market Detected] --> B{Volume Confirmation?}
+                        
+                        B --> |High Volume| C[Confirmed Bull Trend]
+                        B --> |Low Volume| D[Weak Bull Signal]
+                        
+                        C --> E[Position Size: 2% Risk]
+                        D --> F[Position Size: 1% Risk]
+                        
+                        E --> G{RSI Level?}
+                        F --> G
+                        
+                        G --> |< 70| H[Enter Long Position]
+                        G --> |70-80| I[Partial Position]
+                        G --> |> 80| J[Wait for Pullback]
+                        
+                        H --> K[Stop Loss: -2%]
+                        I --> L[Stop Loss: -1.5%]
+                        J --> M[Watch for Entry]
+                        
+                        K --> N[Take Profit: +4%]
+                        L --> O[Take Profit: +3%]
+                        M --> P[Entry on Dip]
+                        
+                        style A fill:#e8f5e8
+                        style C fill:#c8e6c9
+                        style H fill:#4caf50
+                        style N fill:#2e7d32
+                </div>
+                
+                <div class="expert-principle">
+                    <strong>Expert Principle:</strong> Volume confirmation is crucial - price moves without volume are often false signals.
+                </div>
+            </div>
+        </div>
+
+        <!-- Bear Market Scenarios -->
+        <div id="bear-scenarios" class="tab-content">
+            <div class="info-panel">
+                <h4>🐻 Bear Market Expert Strategy</h4>
+                <p>During downtrends, experts focus on capital preservation and selective short opportunities with tight risk control.</p>
+            </div>
+            
+            <div class="scenario-card">
+                <h3>Bear Market Decision Tree</h3>
+                <div class="mermaid">
+                    graph TD
+                        A[Bear Market Detected] --> B{Volatility Level?}
+                        
+                        B --> |High Vol > 5%| C[Extreme Bear Conditions]
+                        B --> |Moderate Vol 2-5%| D[Standard Bear Market]
+                        B --> |Low Vol < 2%| E[Weak Bear Signal]
+                        
+                        C --> F[Capital Preservation Mode]
+                        D --> G[Conservative Short Strategy]
+                        E --> H[Neutral/Wait Strategy]
+                        
+                        F --> I[Position Size: 0.5% Risk]
+                        G --> J[Position Size: 1% Risk]
+                        H --> K[No New Positions]
+                        
+                        I --> L[Short with Tight Stops]
+                        J --> M[Moderate Short Position]
+                        K --> N[Cash Position]
+                        
+                        L --> O[Quick Profit Taking]
+                        M --> P[Swing Short Strategy]
+                        N --> Q[Wait for Reversal]
+                        
+                        style A fill:#ffebee
+                        style C fill:#ffcdd2
+                        style F fill:#f44336
+                        style I fill:#d32f2f
+                </div>
+                
+                <div class="expert-principle">
+                    <strong>Expert Principle:</strong> In bear markets, survival is more important than profits. Reduce risk and preserve capital.
+                </div>
+            </div>
+        </div>
+
+        <!-- Range-Bound Scenarios -->
+        <div id="range-scenarios" class="tab-content">
+            <div class="info-panel">
+                <h4>🌊 Range-Bound Market Strategy</h4>
+                <p>In sideways markets, experts use mean reversion strategies, buying support and selling resistance.</p>
+            </div>
+            
+            <div class="scenario-card">
+                <h3>Range-Bound Market Decision Tree</h3>
+                <div class="mermaid">
+                    graph TD
+                        A[Range-Bound Market] --> B{Range Width?}
+                        
+                        B --> |Wide Range > 5%| C[Strong Range Trading]
+                        B --> |Narrow Range 2-5%| D[Moderate Range Trading]
+                        B --> |Tight Range < 2%| E[Low Probability Setup]
+                        
+                        C --> F[Buy at Support]
+                        C --> G[Sell at Resistance]
+                        D --> H[Smaller Positions]
+                        E --> I[Avoid Trading]
+                        
+                        F --> J[Stop: Below Support]
+                        G --> K[Stop: Above Resistance]
+                        H --> L[Tight Risk Management]
+                        I --> M[Wait for Breakout]
+                        
+                        J --> N[Target: Mid-Range]
+                        K --> O[Target: Mid-Range]
+                        L --> P[Quick Scalping]
+                        M --> Q[Breakout Strategy]
+                        
+                        style A fill:#fff3e0
+                        style C fill:#ffcc02
+                        style F fill:#ff9800
+                        style N fill:#f57c00
+                </div>
+                
+                <div class="expert-principle">
+                    <strong>Expert Principle:</strong> Range trading requires patience and discipline. Wide ranges offer better risk/reward ratios.
+                </div>
+            </div>
+        </div>
+
+        <!-- Risk Management -->
+        <div id="risk-management" class="tab-content">
+            <div class="info-panel">
+                <h4>🛡️ Expert Risk Management</h4>
+                <p>Professional traders prioritize risk control over returns. Maximum drawdown and position sizing are critical.</p>
+            </div>
+            
+            <div class="scenario-card">
+                <h3>Risk Management Decision Matrix</h3>
+                <div class="mermaid">
+                    graph LR
+                        A[Current Drawdown] --> B{< 5%}
+                        A --> C{5-10%}
+                        A --> D{> 10%}
+                        
+                        B --> E[Normal Operations]
+                        C --> F[Reduce Risk 50%]
+                        D --> G[Emergency Stop]
+                        
+                        E --> H[Full Position Sizing]
+                        F --> I[Half Position Sizing]
+                        G --> J[No New Positions]
+                        
+                        H --> K{Sharpe Ratio}
+                        I --> K
+                        J --> L[Review Strategy]
+                        
+                        K --> |> 2.0| M[Increase Allocation]
+                        K --> |1.0-2.0| N[Maintain Current]
+                        K --> |< 1.0| O[Reduce Allocation]
+                        
+                        style B fill:#c8e6c9
+                        style C fill:#fff3e0
+                        style D fill:#ffcdd2
+                        style G fill:#f44336
+                </div>
+                
+                <div class="expert-principle">
+                    <strong>Expert Principle:</strong> Never risk more than you can afford to lose. Drawdown limits prevent catastrophic losses.
+                </div>
+            </div>
+        </div>
+
+        <!-- Position Sizing -->
+        <div id="position-sizing" class="tab-content">
+            <div class="info-panel">
+                <h4>📊 Expert Position Sizing</h4>
+                <p>Proper position sizing is the foundation of professional trading. Risk amount divided by price risk determines position size.</p>
+            </div>
+            
+            <div class="scenario-card">
+                <h3>Position Sizing Calculator Flow</h3>
+                <div class="mermaid">
+                    graph TD
+                        A[Account Balance: $100,000] --> B[Risk Per Trade: 2%]
+                        B --> C[Risk Amount: $2,000]
+                        
+                        C --> D{Entry Price vs Stop Loss}
+                        
+                        D --> E[BTC @ $60,000]
+                        D --> F[Stop Loss @ $58,800]
+                        
+                        E --> G[Price Risk: $1,200]
+                        F --> G
+                        
+                        G --> H[Position Size Calculation]
+                        H --> I[Risk Amount ÷ Price Risk]
+                        I --> J[$2,000 ÷ $1,200 = 1.67 BTC]
+                        
+                        J --> K{Leverage Decision}
+                        
+                        K --> L[No Leverage: $100,000 required]
+                        K --> M[2x Leverage: $50,000 required]
+                        K --> N[3x Leverage: $33,333 required]
+                        
+                        L --> O{Affordable?}
+                        M --> O
+                        N --> O
+                        
+                        O --> |Yes| P[Execute Trade]
+                        O --> |No| Q[Reduce Position Size]
+                        
+                        Q --> R[Max Affordable Position]
+                        R --> S[Adjust Risk Accordingly]
+                        
+                        style A fill:#e3f2fd
+                        style C fill:#bbdefb
+                        style J fill:#2196f3
+                        style P fill:#1976d2
+                </div>
+                
+                <div class="expert-principle">
+                    <strong>Expert Principle:</strong> Position size = Risk amount ÷ (Entry price - Stop loss). Never exceed your account limits.
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div id="performance" class="tab-content">
+            <div class="info-panel">
+                <h4>🏆 Expert Performance Standards</h4>
+                <p>Professional traders focus on risk-adjusted returns, consistency, and drawdown control over absolute gains.</p>
+            </div>
+            
+            <div class="scenario-card">
+                <h3>Professional Trading Benchmarks</h3>
+                <table class="metrics-table">
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Beginner</th>
+                            <th>Intermediate</th>
+                            <th>Expert</th>
+                            <th>Elite</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Sharpe Ratio</strong></td>
+                            <td>< 0.5</td>
+                            <td>0.5 - 1.0</td>
+                            <td class="expert-badge">1.0 - 2.0</td>
+                            <td class="elite-badge">> 2.0</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Max Drawdown</strong></td>
+                            <td>> 25%</td>
+                            <td>15-25%</td>
+                            <td class="expert-badge">5-15%</td>
+                            <td class="elite-badge">< 5%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Win Rate</strong></td>
+                            <td>< 40%</td>
+                            <td>40-50%</td>
+                            <td class="expert-badge">50-60%</td>
+                            <td class="elite-badge">> 60%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Profit Factor</strong></td>
+                            <td>< 1.2</td>
+                            <td>1.2-1.5</td>
+                            <td class="expert-badge">1.5-2.0</td>
+                            <td class="elite-badge">> 2.0</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Consistency</strong></td>
+                            <td>Low</td>
+                            <td>Medium</td>
+                            <td class="expert-badge">High</td>
+                            <td class="elite-badge">Very High</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="expert-principle">
+                    <strong>Expert Principle:</strong> A trader with 30% annual return and 10% max drawdown (Sharpe > 2) is better than one with 200% return and 70% drawdown.
+                </div>
+
+                <h3>Performance Analysis Hierarchy</h3>
+                <div class="mermaid">
+                    graph TD
+                        A[Performance Metrics] --> B[Risk-Adjusted Returns]
+                        A --> C[Raw Performance]
+                        A --> D[Consistency Metrics]
+                        
+                        B --> E[Sharpe Ratio]
+                        B --> F[Sortino Ratio]
+                        B --> G[Calmar Ratio]
+                        
+                        C --> H[Total Return %]
+                        C --> I[Monthly Returns]
+                        C --> J[Peak Performance]
+                        
+                        D --> K[Win Rate %]
+                        D --> L[Profit Factor]
+                        D --> M[Max Drawdown]
+                        
+                        E --> N{> 2.0}
+                        F --> O{> 1.5}
+                        G --> P{> 1.0}
+                        
+                        N --> |Yes| Q[Excellent]
+                        N --> |No| R[Review Strategy]
+                        
+                        style A fill:#f3e5f5
+                        style B fill:#e1bee7
+                        style Q fill:#9c27b0
+                        style R fill:#ff5722
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Wait for DOM and Mermaid to load
+        document.addEventListener('DOMContentLoaded', function() {
+            debugMermaid('DOM Content Loaded');
+            
+            // Double-check Mermaid is available
+            if (typeof mermaid === 'undefined') {
+                console.error('Mermaid is not available');
+                showMermaidError();
+                return;
+            }
+            
+            debugMermaid('Configuring Mermaid');
+            
+            // Configure Mermaid with comprehensive settings
+            try {
+                mermaid.initialize({ 
+                    startOnLoad: false,  // We'll manually control initialization
+                    theme: 'base',
+                    securityLevel: 'loose',  // Allow more flexibility
+                    fontFamily: 'Arial, sans-serif',
+                    fontSize: 14,
+                    flowchart: {
+                        useMaxWidth: true,
+                        htmlLabels: true,
+                        curve: 'basis',
+                        padding: 20,
+                        nodeSpacing: 50,
+                        rankSpacing: 50
+                    },
+                    themeVariables: {
+                        primaryColor: '#4CAF50',
+                        primaryTextColor: '#000000',
+                        primaryBorderColor: '#2E7D32',
+                        lineColor: '#424242',
+                        sectionBkgColor: '#f5f5f5',
+                        altSectionBkgColor: '#e8f5e8',
+                        gridColor: '#cccccc',
+                        secondaryColor: '#FFC107',
+                        tertiaryColor: '#E3F2FD',
+                        background: '#ffffff',
+                        mainBkg: '#ffffff',
+                        secondBkg: '#f8f9fa',
+                        tertiaryBkg: '#e9ecef'
+                    }
+                });
+                
+                debugMermaid('Mermaid configured successfully');
+                
+                // Initial render of all Mermaid diagrams
+                setTimeout(() => {
+                    renderMermaidDiagrams();
+                    validateTabs();
+                }, 500); // Give extra time for everything to settle
+                
+            } catch (error) {
+                console.error('Mermaid configuration error:', error);
+                showMermaidError(error);
+            }
+        });
+        
+        // Function to show Mermaid loading error
+        function showMermaidError(error = null) {
+            const mermaidElements = document.querySelectorAll('.mermaid');
+            mermaidElements.forEach(element => {
+                element.innerHTML = `
+                    <div style="color: red; text-align: center; padding: 30px; border: 2px dashed #e74c3c; border-radius: 8px;">
+                        <h3>🚫 Mermaid Library Error</h3>
+                        <p>The Mermaid diagramming library failed to load or initialize.</p>
+                        <button onclick="window.location.reload()" style="background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 10px;">
+                            🔄 Reload Page
+                        </button>
+                        ${error ? `<details style="margin-top: 15px;"><summary>Technical Details</summary><pre style="text-align: left; font-size: 11px; background: #f8f9fa; padding: 10px; margin-top: 10px;">${error.message || error}</pre></details>` : ''}
+                    </div>
+                `;
+            });
+        }
+
+        // Function to render Mermaid diagrams
+        function renderMermaidDiagrams() {
+            debugMermaid('Starting Mermaid diagram rendering');
+            
+            const mermaidElements = document.querySelectorAll('.mermaid');
+            debugMermaid(`Found ${mermaidElements.length} Mermaid elements`);
+            
+            mermaidElements.forEach((element, index) => {
+                const diagramText = element.textContent.trim();
+                
+                if (!diagramText) {
+                    debugMermaid(`Element ${index} has no content, skipping`);
+                    return;
+                }
+                
+                // Skip if already rendered (has SVG)
+                if (element.querySelector('svg')) {
+                    debugMermaid(`Element ${index} already rendered, skipping`);
+                    return;
+                }
+                
+                // Generate unique ID for each diagram
+                const id = `mermaid-diagram-${index}-${Date.now()}`;
+                element.id = id;
+                
+                debugMermaid(`Rendering diagram ${index}:`, diagramText.substring(0, 50) + '...');
+                
+                try {
+                    // Use the new Mermaid API
+                    mermaid.render(id + '-svg', diagramText).then((result) => {
+                        element.innerHTML = result.svg;
+                        debugMermaid(`Successfully rendered diagram ${index}`);
+                    }).catch((error) => {
+                        console.error(`Mermaid rendering error for element ${index}:`, error);
+                        element.innerHTML = `
+                            <div style="color: red; text-align: center; padding: 20px; border: 2px dashed #ccc;">
+                                <h4>⚠️ Diagram Rendering Error</h4>
+                                <p>Failed to render Mermaid diagram</p>
+                                <details style="margin-top: 10px;">
+                                    <summary>Error Details</summary>
+                                    <pre style="text-align: left; font-size: 12px; background: #f5f5f5; padding: 10px; margin-top: 5px;">${error.message || error}</pre>
+                                </details>
+                            </div>
+                        `;
+                    });
+                } catch (error) {
+                    console.error(`Mermaid initialization error for element ${index}:`, error);
+                    element.innerHTML = `
+                        <div style="color: orange; text-align: center; padding: 20px; border: 2px dashed #ccc;">
+                            <h4>⚠️ Diagram Initialization Error</h4>
+                            <p>Failed to initialize Mermaid diagram</p>
+                            <details style="margin-top: 10px;">
+                                <summary>Error Details</summary>
+                                <pre style="text-align: left; font-size: 12px; background: #f5f5f5; padding: 10px; margin-top: 5px;">${error.message || error}</pre>
+                            </details>
+                        </div>
+                    `;
+                }
+            });
+        }
+        
+        // Function to validate all tabs are properly configured
+        function validateTabs() {
+            const expectedTabs = [
+                'bull-scenarios',
+                'bear-scenarios', 
+                'range-scenarios',
+                'risk-management',
+                'position-sizing',
+                'performance'
+            ];
+            
+            debugMermaid('Validating tab configuration...');
+            
+            expectedTabs.forEach(tabId => {
+                const tabContent = document.getElementById(tabId);
+                const navButton = document.querySelector(`[onclick*="${tabId}"]`);
+                
+                if (!tabContent) {
+                    console.error(`❌ Missing tab content: ${tabId}`);
+                } else {
+                    debugMermaid(`✅ Tab content found: ${tabId}`);
+                }
+                
+                if (!navButton) {
+                    console.error(`❌ Missing nav button for: ${tabId}`);
+                } else {
+                    debugMermaid(`✅ Nav button found for: ${tabId}`);
+                }
+            });
+            
+            debugMermaid('Tab validation complete');
+        }
+
+        // Tab switching functionality
+        function showTab(tabId) {
+            debugMermaid(`Switching to tab: ${tabId}`);
+            
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => tab.classList.remove('active'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab content
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) {
+                targetTab.classList.add('active');
+                debugMermaid(`Successfully activated tab: ${tabId}`);
+            } else {
+                console.error(`Tab with ID '${tabId}' not found`);
+                return;
+            }
+            
+            // Find and activate the corresponding nav tab
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(tab => {
+                if (tab.getAttribute('onclick').includes(tabId)) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            // Re-render mermaid diagrams for the active tab only
+            setTimeout(() => {
+                const activeTabMermaid = document.querySelector(`#${tabId} .mermaid`);
+                if (activeTabMermaid) {
+                    const diagramText = activeTabMermaid.textContent.trim();
+                    if (diagramText && !activeTabMermaid.querySelector('svg')) {
+                        debugMermaid(`Re-rendering Mermaid for tab: ${tabId}`);
+                        renderMermaidDiagrams();
+                    }
+                }
+            }, 300);
+        }
+        
+        // Test function to cycle through all tabs (for debugging)
+        window.testAllTabs = function() {
+            const tabs = ['bull-scenarios', 'bear-scenarios', 'range-scenarios', 'risk-management', 'position-sizing', 'performance'];
+            let currentIndex = 0;
+            
+            console.log('🧪 Testing all tabs...');
+            
+            function nextTab() {
+                if (currentIndex < tabs.length) {
+                    const tabId = tabs[currentIndex];
+                    console.log(`Testing tab ${currentIndex + 1}/6: ${tabId}`);
+                    showTab(tabId);
+                    currentIndex++;
+                    setTimeout(nextTab, 2000); // Wait 2 seconds between tab switches
+                } else {
+                    console.log('✅ All tabs tested successfully!');
+                    showTab('bull-scenarios'); // Return to first tab
+                }
+            }
+            
+            nextTab();
+        };
+
+        // Auto-refresh live status
+        setInterval(() => {
+            fetch('/api/health')
+                .then(response => {
+                    if (response.ok) {
+                        document.querySelector('.live-status').textContent = '🟢 EXPERT SYSTEM LIVE';
+                        document.querySelector('.live-status').style.background = '#2ecc71';
+                    }
+                })
+                .catch(() => {
+                    document.querySelector('.live-status').textContent = '🔴 SYSTEM OFFLINE';
+                    document.querySelector('.live-status').style.background = '#e74c3c';
+                });
+        }, 5000);
+    </script>
+</body>
+</html>

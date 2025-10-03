@@ -3,6 +3,7 @@ import axios from 'axios';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import DatabaseService from './database/database-service.js';
 
 // Load environment variables
 dotenv.config();
@@ -12,9 +13,11 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = 4000;
+const db = new DatabaseService();
 
 // Serve static files from public directory
 app.use(express.static('public'));
+app.use('/docs', express.static('docs'));
 app.use(express.json());
 
 // CORS middleware
@@ -149,9 +152,16 @@ app.get('/api/market-analysis', async (req, res) => {
   }
 });
 
-// Agent Status API
+// Agent Status API - Updated for Execution Agent
 app.get('/api/agent-status', (req, res) => {
   const status = {
+    executionAgent: { 
+      status: 'active', 
+      name: 'Execution Agent - 5% Weekly Target',
+      goal: '5% return per week',
+      refreshRate: '1 minute',
+      lastUpdate: new Date().toISOString()
+    },
     dataCollector: { 
       status: 'active', 
       name: 'Real-time Data Collector',
@@ -175,6 +185,53 @@ app.get('/api/agent-status', (req, res) => {
   };
   
   res.json({ success: true, data: status });
+});
+
+// Execution Agent Progress API
+app.get('/api/execution-progress', async (req, res) => {
+  try {
+    const portfolio = await db.getCurrentPortfolio();
+    const startingValue = 10000;
+    const weeklyTarget = 0.05; // 5%
+    
+    if (!portfolio) {
+      return res.json({
+        success: true,
+        data: {
+          currentValue: startingValue,
+          startingValue,
+          currentReturn: 0,
+          targetReturn: weeklyTarget,
+          progressPercent: 0,
+          onTrack: true,
+          weeklyTarget: startingValue * (1 + weeklyTarget)
+        }
+      });
+    }
+    
+    const currentReturn = (portfolio.total_value_usd - startingValue) / startingValue;
+    const progressPercent = (currentReturn / weeklyTarget * 100);
+    
+    res.json({
+      success: true,
+      data: {
+        currentValue: portfolio.total_value_usd,
+        startingValue,
+        currentReturn,
+        targetReturn: weeklyTarget,
+        progressPercent: progressPercent.toFixed(1),
+        onTrack: currentReturn >= (weeklyTarget * 0.5), // Simplified tracking
+        weeklyTarget: startingValue * (1 + weeklyTarget),
+        lastUpdated: portfolio.last_updated
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching execution progress:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch execution agent progress'
+    });
+  }
 });
 
 // Content Generation API (using real-time data)
@@ -213,7 +270,163 @@ app.get('/api/generate-content', async (req, res) => {
   }
 });
 
-// Health check endpoint
+// Portfolio API
+app.get('/api/portfolio', async (req, res) => {
+  try {
+    const portfolio = await db.getCurrentPortfolio();
+    
+    if (!portfolio) {
+      // Return default portfolio if none exists
+      res.json({
+        success: true,
+        data: {
+          btcHoldings: 0,
+          usdBalance: 10000,
+          totalValue: 10000,
+          totalProfit: 0,
+          profitPercentage: 0,
+          lastUpdated: new Date().toISOString()
+        }
+      });
+    } else {
+      res.json({
+        success: true,
+        data: {
+          btcHoldings: portfolio.btc_holdings,
+          usdBalance: portfolio.usd_balance,
+          totalValue: portfolio.total_value_usd,
+          totalProfit: portfolio.total_profit_usd,
+          profitPercentage: portfolio.profit_percentage,
+          lastUpdated: portfolio.last_updated
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Error fetching portfolio:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch portfolio data',
+      details: error.message
+    });
+  }
+});
+
+// Performance Metrics API
+app.get('/api/performance', async (req, res) => {
+  try {
+    const performance = await db.getDetailedPerformance();
+    res.json({ success: true, data: performance });
+  } catch (error) {
+    console.error('Error fetching performance metrics:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch performance metrics',
+      details: error.message
+    });
+  }
+});
+
+// Agent Execution Logs API
+app.get('/api/agent-logs', async (req, res) => {
+  try {
+    const agentName = req.query.agent;
+    const limit = parseInt(req.query.limit) || 50;
+    
+    if (db && db.getAgentExecutions) {
+      // Try to get real data from database
+      const logs = await db.getAgentExecutions(agentName, limit);
+      res.json({
+        success: true,
+        data: logs.map(log => ({
+          id: log.id,
+          timestamp: new Date(log.timestamp).toISOString(), // GMT format
+          agent: log.agent_name,
+          type: log.execution_type,
+          success: log.success,
+          executionTime: log.execution_time_ms,
+          input: log.input_data ? JSON.parse(log.input_data) : null,
+          output: log.output_data ? JSON.parse(log.output_data) : null,
+          error: log.error_message,
+          // Enhanced details for decision history
+          details: log.input_data ? (() => {
+            try {
+              const input = JSON.parse(log.input_data);
+              if (input.decision) {
+                return {
+                  action: input.decision.action,
+                  amount: input.decision.amount,
+                  price: input.decision.price,
+                  confidence: input.decision.confidence,
+                  reasoning: input.decision.reasoning,
+                  urgency: input.decision.urgency,
+                  progressPercent: input.metrics?.progressPercent || 'N/A',
+                  daysRemaining: input.metrics?.daysRemaining || 'N/A'
+                };
+              }
+            } catch (e) {}
+            return null;
+          })() : null
+        }))
+      });
+    } else {
+      // No database or real data available
+      res.json({
+        success: true,
+        data: []
+      });
+    }
+  } catch (error) {
+    console.error('Error fetching agent logs:', error);
+    res.json({
+      success: true,
+      data: []
+    });
+  }
+});
+
+// Trade History API
+app.get('/api/trade-history', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 100;
+    const trades = await db.getRecentTrades(limit);
+    
+    if (!trades || trades.length === 0) {
+      res.json({
+        success: true,
+        data: [],
+        message: 'No trades recorded yet. Trading activity will appear here when the execution agent starts making trades.'
+      });
+      return;
+    }
+    
+    const formattedTrades = trades.map(trade => ({
+      id: trade.id,
+      date: new Date(trade.timestamp).toISOString(), // GMT format
+      type: trade.trade_type,
+      amount: trade.amount_btc,
+      price: trade.price_usd,
+      fee: trade.fee_usd || 0,
+      total: trade.total_usd,
+      reason: trade.agent_decision_reason || '',
+      marketConditions: trade.market_conditions || '',
+      executedBy: trade.executed_by || 'execution-agent'
+    }));
+    
+    res.json({
+      success: true,
+      data: formattedTrades
+    });
+  } catch (error) {
+    console.error('Error fetching trade history:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch trade history',
+      details: error.message
+    });
+  }
+});
+
+// Health Check API
 app.get('/api/health', (req, res) => {
   res.json({ 
     success: true, 
@@ -227,6 +440,41 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Trading Scenarios Dashboard
+app.get('/scenarios', (req, res) => {
+  res.sendFile(path.join(__dirname, 'docs', 'scenarios-obvious.html'));
+});
+
+// Original Scenarios (with Mermaid)
+app.get('/scenarios-original', (req, res) => {
+  res.sendFile(path.join(__dirname, 'docs', 'trading-scenarios-dashboard.html'));
+});
+
+// Test Scenarios Dashboard
+app.get('/scenarios-test', (req, res) => {
+  res.sendFile(path.join(__dirname, 'docs', 'scenarios-test.html'));
+});
+
+// Tab Test Page
+app.get('/tab-test', (req, res) => {
+  res.sendFile(path.join(__dirname, 'docs', 'tab-test.html'));
+});
+
+// Debug Dashboard
+app.get('/debug', (req, res) => {
+  res.sendFile(path.join(__dirname, 'docs', 'debug-dashboard.html'));
+});
+
+// Test Interface
+app.get('/test', (req, res) => {
+  res.sendFile(path.join(__dirname, 'docs', 'test-interface.html'));
+});
+
+// Main Dashboard  
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'docs', 'index.html'));
+});
+
 app.listen(port, () => {
   console.log(`🤖 Bitcoin Intelligence Agent API running on port ${port}`);
   console.log(`📊 Dashboard available at http://localhost:${port}`);
@@ -235,6 +483,8 @@ app.listen(port, () => {
   console.log(`   - http://localhost:${port}/api/bitcoin-news`);
   console.log(`   - http://localhost:${port}/api/market-analysis`);
   console.log(`   - http://localhost:${port}/api/agent-status`);
+  console.log(`   - http://localhost:${port}/api/performance`);
+  console.log(`   - http://localhost:${port}/api/agent-logs`);
   console.log(`   - http://localhost:${port}/api/generate-content`);
   console.log(`   - http://localhost:${port}/api/health`);
   console.log(`\\n🌐 Real-time data sources:`);

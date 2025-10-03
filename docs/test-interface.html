@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Complete Tab System Test Interface</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .test-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .test-card h3 {
+            color: #FFD700;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+        
+        .test-button {
+            display: inline-block;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .debug-button {
+            background: linear-gradient(45deg, #FF9800, #F57C00);
+        }
+        
+        .scenario-button {
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+        }
+        
+        .tab-list {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .tab-list h4 {
+            color: #FFD700;
+            margin-bottom: 10px;
+        }
+        
+        .tab-item {
+            display: block;
+            color: #E0E0E0;
+            margin: 5px 0;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .status-panel {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .status-good {
+            color: #4CAF50;
+        }
+        
+        .status-warning {
+            color: #FF9800;
+        }
+        
+        .status-error {
+            color: #F44336;
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Complete Tab System Test Interface</h1>
+            <p>Comprehensive testing for all dashboard interfaces and tab functionality</p>
+        </div>
+
+        <div class="instructions">
+            <h3>📋 Testing Instructions</h3>
+            <ol>
+                <li><strong>Test each dashboard below</strong> - Click the buttons to open different interfaces</li>
+                <li><strong>Look for tab navigation bars</strong> - Should be horizontal buttons near the top</li>
+                <li><strong>Click each tab</strong> - Content should change when you click different tabs</li>
+                <li><strong>Check the debug logs</strong> - Some interfaces show real-time debugging info</li>
+                <li><strong>Report what you see</strong> - Tell me which interfaces have working tabs and which don't</li>
+            </ol>
+        </div>
+
+        <div class="test-grid">
+            <!-- Main Dashboard Test -->
+            <div class="test-card">
+                <h3>🏠 Main Dashboard</h3>
+                <p>The primary Bitcoin intelligence dashboard with portfolio status.</p>
+                <div class="tab-list">
+                    <h4>Expected Tabs:</h4>
+                    <span class="tab-item">❌ No tabs (this is correct - it's the main overview page)</span>
+                </div>
+                <a href="/" class="test-button" target="_blank">🏠 Open Main Dashboard</a>
+                <div class="status-panel">
+                    <p class="status-good">✅ Status: Should show portfolio, price, execution agent status</p>
+                </div>
+            </div>
+
+            <!-- Trading Scenarios Dashboard -->
+            <div class="test-card">
+                <h3>🎯 Trading Scenarios Dashboard</h3>
+                <p>Advanced trading scenarios with Mermaid decision trees.</p>
+                <div class="tab-list">
+                    <h4>Expected Tabs (6 total):</h4>
+                    <span class="tab-item">📈 Bull Market - Trend-following strategies</span>
+                    <span class="tab-item">📉 Bear Market - Capital preservation</span>
+                    <span class="tab-item">🌊 Range-Bound - Mean reversion strategies</span>
+                    <span class="tab-item">🛡️ Risk Management - Drawdown control</span>
+                    <span class="tab-item">📊 Position Sizing - Mathematical calculations</span>
+                    <span class="tab-item">🏆 Performance - Professional benchmarks</span>
+                </div>
+                <a href="/scenarios" class="test-button scenario-button" target="_blank">🎯 Open Scenarios Dashboard</a>
+                <div class="status-panel">
+                    <p class="status-warning">⚠️ Status: Should have 6 clickable tabs with Mermaid diagrams</p>
+                </div>
+            </div>
+
+            <!-- Debug Dashboard -->
+            <div class="test-card">
+                <h3>🔍 Debug Dashboard</h3>
+                <p>Real-time debugging interface with tab functionality diagnostics.</p>
+                <div class="tab-list">
+                    <h4>Expected Tabs (6 total):</h4>
+                    <span class="tab-item">📈 Bull Market - Debug version</span>
+                    <span class="tab-item">📉 Bear Market - Debug version</span>
+                    <span class="tab-item">🌊 Range-Bound - Debug version</span>
+                    <span class="tab-item">🛡️ Risk Management - Debug version</span>
+                    <span class="tab-item">📊 Position Sizing - Debug version</span>
+                    <span class="tab-item">🏆 Performance - Debug version</span>
+                </div>
+                <a href="/debug" class="test-button debug-button" target="_blank">🔍 Open Debug Dashboard</a>
+                <div class="status-panel">
+                    <p class="status-good">✅ Status: Should show green debug log and working tabs</p>
+                </div>
+            </div>
+
+            <!-- Simple Tab Test -->
+            <div class="test-card">
+                <h3>🧪 Simple Tab Test</h3>
+                <p>Minimal implementation to verify basic tab switching works.</p>
+                <div class="tab-list">
+                    <h4>Expected Tabs (6 total):</h4>
+                    <span class="tab-item">📈 Bull Market - Simple version</span>
+                    <span class="tab-item">📉 Bear Market - Simple version</span>
+                    <span class="tab-item">🌊 Range-Bound - Simple version</span>
+                    <span class="tab-item">🛡️ Risk Management - Simple version</span>
+                    <span class="tab-item">📊 Position Sizing - Simple version</span>
+                    <span class="tab-item">🏆 Performance - Simple version</span>
+                </div>
+                <a href="/tab-test" class="test-button" target="_blank">🧪 Open Tab Test</a>
+                <div class="status-panel">
+                    <p class="status-good">✅ Status: Guaranteed working tabs with test results</p>
+                </div>
+            </div>
+
+            <!-- Trading Dashboard -->
+            <div class="test-card">
+                <h3>📊 Trading Dashboard</h3>
+                <p>Original trading interface with real-time data.</p>
+                <div class="tab-list">
+                    <h4>Expected Tabs:</h4>
+                    <span class="tab-item">❓ Unknown - Check if this has tabs</span>
+                </div>
+                <a href="/docs/trading-dashboard.html" class="test-button" target="_blank">📊 Open Trading Dashboard</a>
+                <div class="status-panel">
+                    <p class="status-warning">⚠️ Status: May or may not have tabs - please check</p>
+                </div>
+            </div>
+
+            <!-- Live Agent Stream -->
+            <div class="test-card">
+                <h3>📡 Live Agent Stream</h3>
+                <p>Real-time agent decision streaming interface.</p>
+                <div class="tab-list">
+                    <h4>Expected Tabs:</h4>
+                    <span class="tab-item">❓ Unknown - Check if this has tabs</span>
+                </div>
+                <a href="/docs/live-agent-stream.html" class="test-button" target="_blank">📡 Open Agent Stream</a>
+                <div class="status-panel">
+                    <p class="status-warning">⚠️ Status: May or may not have tabs - please check</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>🔧 Auto-Testing Features</h3>
+            <p>Some dashboards have built-in auto-testing. Open the browser console (F12) and try these commands:</p>
+            <ul>
+                <li><code>testTabs()</code> - Auto-cycle through all tabs (Debug Dashboard)</li>
+                <li><code>autoTestTabs()</code> - Auto-test with results (Simple Tab Test)</li>
+                <li><code>window.testAllTabs()</code> - Complete tab testing (Scenarios Dashboard)</li>
+            </ul>
+        </div>
+
+        <div class="status-panel">
+            <h3>📝 What to Report Back</h3>
+            <p>For each dashboard you test, please tell me:</p>
+            <ol>
+                <li><strong>Do you see tab buttons?</strong> (Usually horizontal buttons near the top)</li>
+                <li><strong>Do the tabs work?</strong> (Content changes when you click them)</li>
+                <li><strong>How many tabs are there?</strong> (Should be 6 for scenarios dashboards)</li>
+                <li><strong>Any error messages?</strong> (In debug panels or browser console)</li>
+                <li><strong>What content do you see?</strong> (Text, diagrams, tables, etc.)</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // Check server status
+        fetch('/api/health')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Server status:', data);
+                if (data.success) {
+                    document.querySelector('.header p').innerHTML += ' <span style="color: #4CAF50;">🟢 Server Online</span>';
+                }
+            })
+            .catch(error => {
+                console.error('Server check failed:', error);
+                document.querySelector('.header p').innerHTML += ' <span style="color: #F44336;">🔴 Server Error</span>';
+            });
+    </script>
+</body>
+</html>

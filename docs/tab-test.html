@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tab Test - Simple Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f0f0f0;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .nav-tab {
+            padding: 10px 20px;
+            background: #ddd;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        
+        .nav-tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Tab Functionality Test</h1>
+    
+    <div class="nav-tabs">
+        <button class="nav-tab active" onclick="showTab('bull-scenarios', this)">📈 Bull Market</button>
+        <button class="nav-tab" onclick="showTab('bear-scenarios', this)">📉 Bear Market</button>
+        <button class="nav-tab" onclick="showTab('range-scenarios', this)">🌊 Range-Bound</button>
+        <button class="nav-tab" onclick="showTab('risk-management', this)">🛡️ Risk Management</button>
+        <button class="nav-tab" onclick="showTab('position-sizing', this)">📊 Position Sizing</button>
+        <button class="nav-tab" onclick="showTab('performance', this)">🏆 Performance</button>
+    </div>
+
+    <div id="test-results"></div>
+
+    <!-- Tab Contents -->
+    <div id="bull-scenarios" class="tab-content active">
+        <h2>📈 Bull Market Strategies</h2>
+        <p>This is the Bull Market tab content. If you can see this clearly and switching between tabs works, the functionality is correct.</p>
+        <ul>
+            <li>Trend-following strategies</li>
+            <li>Volume confirmation required</li>
+            <li>Position size: 2% risk max</li>
+        </ul>
+    </div>
+
+    <div id="bear-scenarios" class="tab-content">
+        <h2>📉 Bear Market Strategies</h2>
+        <p>This is the Bear Market tab content. Capital preservation is key during downtrends.</p>
+        <ul>
+            <li>Defensive positioning</li>
+            <li>Reduced risk exposure</li>
+            <li>Short opportunities with tight stops</li>
+        </ul>
+    </div>
+
+    <div id="range-scenarios" class="tab-content">
+        <h2>🌊 Range-Bound Strategies</h2>
+        <p>This is the Range-Bound Market tab content. Mean reversion strategies work best here.</p>
+        <ul>
+            <li>Buy support, sell resistance</li>
+            <li>Tight stop losses</li>
+            <li>Quick profit taking</li>
+        </ul>
+    </div>
+
+    <div id="risk-management" class="tab-content">
+        <h2>🛡️ Risk Management</h2>
+        <p>This is the Risk Management tab content. Professional risk control principles.</p>
+        <ul>
+            <li>Maximum 2% risk per trade</li>
+            <li>Stop losses always active</li>
+            <li>Position sizing based on volatility</li>
+        </ul>
+    </div>
+
+    <div id="position-sizing" class="tab-content">
+        <h2>📊 Position Sizing</h2>
+        <p>This is the Position Sizing tab content. Mathematical approach to trade sizing.</p>
+        <ul>
+            <li>Risk Amount ÷ (Entry - Stop Loss)</li>
+            <li>Account for leverage carefully</li>
+            <li>Never exceed account limits</li>
+        </ul>
+    </div>
+
+    <div id="performance" class="tab-content">
+        <h2>🏆 Performance Metrics</h2>
+        <p>This is the Performance tab content. Key metrics for professional trading.</p>
+        <ul>
+            <li>Sharpe Ratio > 1.5</li>
+            <li>Max Drawdown < 15%</li>
+            <li>Profit Factor > 1.5</li>
+        </ul>
+    </div>
+
+    <script>
+        function showTab(tabId, buttonElement) {
+            console.log('Switching to tab:', tabId);
+            
+            // Test results array
+            const results = [];
+            
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all nav tabs
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) {
+                targetTab.classList.add('active');
+                results.push({ type: 'success', message: `✅ Successfully activated tab: ${tabId}` });
+            } else {
+                results.push({ type: 'error', message: `❌ Tab '${tabId}' not found` });
+            }
+            
+            // Activate the clicked button
+            if (buttonElement) {
+                buttonElement.classList.add('active');
+                results.push({ type: 'success', message: `✅ Button activated for: ${tabId}` });
+            } else {
+                results.push({ type: 'error', message: `❌ Button element not provided` });
+            }
+            
+            // Display test results
+            displayTestResults(results);
+        }
+        
+        function displayTestResults(results) {
+            const container = document.getElementById('test-results');
+            container.innerHTML = '<h3>Last Tab Switch Results:</h3>';
+            
+            results.forEach(result => {
+                const div = document.createElement('div');
+                div.className = `test-result ${result.type}`;
+                div.textContent = result.message;
+                container.appendChild(div);
+            });
+        }
+        
+        // Test all tabs on page load
+        window.addEventListener('load', function() {
+            console.log('Page loaded, testing tab functionality...');
+            
+            const expectedTabs = ['bull-scenarios', 'bear-scenarios', 'range-scenarios', 'risk-management', 'position-sizing', 'performance'];
+            const results = [];
+            
+            expectedTabs.forEach(tabId => {
+                const tabContent = document.getElementById(tabId);
+                const navButton = document.querySelector(`[onclick*="${tabId}"]`);
+                
+                if (tabContent) {
+                    results.push({ type: 'success', message: `✅ Tab content exists: ${tabId}` });
+                } else {
+                    results.push({ type: 'error', message: `❌ Missing tab content: ${tabId}` });
+                }
+                
+                if (navButton) {
+                    results.push({ type: 'success', message: `✅ Nav button exists: ${tabId}` });
+                } else {
+                    results.push({ type: 'error', message: `❌ Missing nav button: ${tabId}` });
+                }
+            });
+            
+            displayTestResults(results);
+        });
+        
+        // Auto-test function
+        window.autoTestTabs = function() {
+            const tabs = ['bull-scenarios', 'bear-scenarios', 'range-scenarios', 'risk-management', 'position-sizing', 'performance'];
+            let currentIndex = 0;
+            
+            console.log('🧪 Auto-testing all tabs...');
+            
+            function nextTab() {
+                if (currentIndex < tabs.length) {
+                    const tabId = tabs[currentIndex];
+                    const button = document.querySelector(`[onclick*="${tabId}"]`);
+                    console.log(`Testing tab ${currentIndex + 1}/6: ${tabId}`);
+                    showTab(tabId, button);
+                    currentIndex++;
+                    setTimeout(nextTab, 1500);
+                } else {
+                    console.log('✅ All tabs tested!');
+                    const button = document.querySelector(`[onclick*="bull-scenarios"]`);
+                    showTab('bull-scenarios', button);
+                }
+            }
+            
+            nextTab();
+        };
+    </script>
+</body>
+</html>

@@ -16,9 +16,16 @@ class ContinuousTradingService {
     positions: [] as any[],
     totalPnL: 0
   };
-  private agents = ['Strategic Orchestrator', 'Market Hunter', 'Performance Optimizer', 'Narrative Architect'];
+  private agents = ['Strategic Orchestrator', 'Market Hunter', 'Performance Optimizer', 'Execution Agent'];
   private tradingInterval: NodeJS.Timeout | null = null;
   private logFile = '/workspaces/TweetBot/trading-log.json';
+  
+  // EXECUTION AGENT GOALS
+  private weeklyTargetReturn = 0.05; // 5% per week
+  private refreshInterval = 1 * 60 * 1000; // 1 minute
+  private startingValue = 10000;
+  private weekStartTime = Date.now();
+  private weeklyTarget = this.startingValue * (1 + this.weeklyTargetReturn);
 
   constructor() {
     this.loadPortfolio();
@@ -31,20 +38,21 @@ class ContinuousTradingService {
     }
 
     this.isRunning = true;
-    console.log('🚀 STARTING CONTINUOUS AUTONOMOUS TRADING SERVICE');
-    console.log('💰 Managing $10K corpus with 24/7 agent decisions');
-    console.log('📊 Interval: Every 30 minutes');
+    console.log('🚀 STARTING EXECUTION AGENT - 5% WEEKLY TARGET');
+    console.log('💰 Managing $10K corpus with aggressive 1-minute decisions');
+    console.log('📊 Interval: Every 1 minute');
+    console.log(`🎯 Weekly Goal: 5% return (Target: $${this.weeklyTarget.toFixed(2)})`);
     console.log('🛑 Press Ctrl+C to stop\n');
 
     // Make immediate decision
     await this.makeDecision();
 
-    // Set up continuous trading (every 30 minutes)
+    // Set up continuous trading (every 1 minute)
     this.tradingInterval = setInterval(async () => {
       if (this.isRunning) {
         await this.makeDecision();
       }
-    }, 30 * 60 * 1000); // 30 minutes
+    }, this.refreshInterval); // 1 minute
 
     // Graceful shutdown
     process.on('SIGINT', () => {
@@ -73,19 +81,26 @@ class ContinuousTradingService {
 
   private async makeDecision(): Promise<void> {
     const timestamp = new Date().toLocaleString();
-    const agent = this.agents[Math.floor(Math.random() * this.agents.length)];
-    const decision = this.generateAgentDecision(agent);
+    
+    // Calculate progress toward weekly goal
+    const progressMetrics = this.calculateWeeklyProgress();
+    
+    // Use Execution Agent for goal-oriented decisions
+    const agent = 'Execution Agent';
+    const decision = this.generateExecutionAgentDecision(progressMetrics);
     
     console.log(`\n🤖 [${timestamp}] ${agent} Decision:`);
+    console.log(`   📊 Weekly Progress: ${progressMetrics.progressPercent}% (${progressMetrics.daysRemaining} days left)`);
+    console.log(`   🎯 Target: $${this.weeklyTarget.toFixed(2)} | Current: $${this.portfolio.totalValue.toFixed(2)}`);
     console.log(`   ${decision.action.toUpperCase()} ${decision.amount} ${decision.symbol} @ $${decision.price}`);
     console.log(`   Reason: ${decision.reasoning}`);
-    console.log(`   Confidence: ${decision.confidence}%`);
+    console.log(`   Confidence: ${decision.confidence}% | Urgency: ${decision.urgency}`);
 
     // Execute decision
     this.executeDecision(decision);
     
     // Log to file
-    await this.logDecision({ timestamp, agent, decision, portfolio: { ...this.portfolio } });
+    await this.logDecision({ timestamp, agent, decision, portfolio: { ...this.portfolio }, progressMetrics });
     
     // Display portfolio status
     this.displayPortfolio();
@@ -225,6 +240,98 @@ class ContinuousTradingService {
     } catch (error) {
       console.error('❌ Failed to log decision:', error);
     }
+  }
+
+  // EXECUTION AGENT METHODS - 5% Weekly Return Goal
+  private calculateWeeklyProgress(): any {
+    const currentTime = Date.now();
+    const weekElapsed = (currentTime - this.weekStartTime) / (7 * 24 * 60 * 60 * 1000);
+    const daysRemaining = Math.max(0, 7 - Math.floor(weekElapsed * 7));
+    
+    const currentReturn = (this.portfolio.totalValue - this.startingValue) / this.startingValue;
+    const targetReturn = this.weeklyTargetReturn;
+    const progressPercent = (currentReturn / targetReturn * 100).toFixed(1);
+    
+    const remainingReturn = targetReturn - currentReturn;
+    const dailyTargetRemaining = remainingReturn / Math.max(1, daysRemaining);
+    
+    return {
+      currentReturn,
+      targetReturn,
+      progressPercent,
+      daysRemaining,
+      remainingReturn,
+      dailyTargetRemaining,
+      weekElapsed,
+      isOnTrack: currentReturn >= (targetReturn * weekElapsed),
+      urgency: daysRemaining <= 2 ? 'HIGH' : daysRemaining <= 4 ? 'MEDIUM' : 'LOW'
+    };
+  }
+
+  private generateExecutionAgentDecision(metrics: any): any {
+    const symbols = ['BTC', 'ETH', 'SOL', 'ADA', 'DOT', 'AVAX', 'MATIC', 'LINK'];
+    const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+    
+    // Goal-oriented decision making
+    let action = 'HOLD';
+    let reasoning = 'Maintaining current positions while monitoring market conditions';
+    let confidence = 60;
+    let amount = 0;
+    
+    // Aggressive actions when behind target
+    if (!metrics.isOnTrack) {
+      if (metrics.urgency === 'HIGH') {
+        action = 'BUY';
+        reasoning = `URGENT: ${metrics.daysRemaining} days left to achieve 5% weekly target. Need ${(metrics.remainingReturn * 100).toFixed(1)}% return.`;
+        confidence = 85;
+        amount = Math.min(this.portfolio.cash * 0.3, 2000); // Up to 30% of cash or $2000
+      } else if (metrics.urgency === 'MEDIUM') {
+        action = Math.random() > 0.3 ? 'BUY' : 'HOLD';
+        reasoning = `Behind target: Need ${(metrics.dailyTargetRemaining * 100).toFixed(2)}% daily return. Taking calculated risk.`;
+        confidence = 75;
+        amount = Math.min(this.portfolio.cash * 0.2, 1500); // Up to 20% of cash or $1500
+      } else {
+        action = Math.random() > 0.5 ? 'BUY' : 'HOLD';
+        reasoning = `Slightly behind target. Moderate position to catch up to 5% weekly goal.`;
+        confidence = 70;
+        amount = Math.min(this.portfolio.cash * 0.15, 1000); // Up to 15% of cash or $1000
+      }
+    } else {
+      // Conservative when on track or ahead
+      if (metrics.currentReturn >= metrics.targetReturn) {
+        action = Math.random() > 0.7 ? 'SELL' : 'HOLD';
+        reasoning = `Target achieved! Current return: ${(metrics.currentReturn * 100).toFixed(1)}%. Securing profits.`;
+        confidence = 90;
+        
+        // Sell some positions to lock in gains
+        const positionsValue = this.portfolio.positions.reduce((total, pos) => total + (pos.amount * pos.currentPrice), 0);
+        amount = positionsValue * 0.1; // Sell 10% of positions
+      } else {
+        action = Math.random() > 0.6 ? 'BUY' : 'HOLD';
+        reasoning = `On track for 5% weekly target. Steady progress with measured risk.`;
+        confidence = 80;
+        amount = Math.min(this.portfolio.cash * 0.1, 800); // Up to 10% of cash or $800
+      }
+    }
+    
+    const price = Math.random() * 100 + 20; // Simulated price
+    if (action === 'SELL') {
+      amount = amount / price; // Convert to quantity for sell orders
+    } else if (action === 'BUY') {
+      amount = amount / price; // Convert to quantity for buy orders
+    }
+    
+    return {
+      agent: 'Execution Agent',
+      action,
+      symbol,
+      amount: parseFloat(amount.toFixed(4)),
+      price: parseFloat(price.toFixed(2)),
+      confidence,
+      reasoning,
+      urgency: metrics.urgency,
+      expectedReturn: Math.floor(Math.random() * 15 + 5)
+    };
   }
 }
 
