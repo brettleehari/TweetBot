@@ -6,14 +6,16 @@ This diagram shows the complete flow of the Bitcoin Trading Intelligence System 
 
 ```mermaid
 graph TB
-    %% Application Entry Points
-    Start([🚀 Application Start]) --> ServerInit[📡 Server Initialization]
-    ServerInit --> AgentManagerInit[🤖 AgentManager Initialization]
-    ServerInit --> DatabaseInit[(�️ Database Connection)]
+    %% Application Entry Points & Initialization
+    Start([🚀 Application Start]) --> EnvLoad[⚙️ Load Environment Variables]
+    EnvLoad --> ServerInit[📡 Express Server Initialization]
+    ServerInit --> DatabaseInit[(🗄️ DatabaseService Connection)]
+    ServerInit --> AgentManagerInit[🤖 AgentManager Auto-Initialization]
+    ServerInit --> StaticServing[📁 Static File Serving]
     ServerInit --> DashboardServe[🖥️ Dashboard Server Start]
     
     %% Agent Manager System
-    AgentManagerInit --> AgentSystemStart[⚡ Agent System Startup]
+    AgentManagerInit --> AgentSystemStart[⚡ Agent System Auto-Startup]
     AgentSystemStart --> StrategicOrchestrator[🎯 Strategic Orchestrator Agent]
     AgentSystemStart --> MarketHunter[📊 Market Hunter Agent] 
     AgentSystemStart --> DataCollector[📈 Data Collector Agent]
@@ -26,6 +28,7 @@ graph TB
     TimingCycles --> Cycle15min[🕐 15-min Strategy Review]
     TimingCycles --> Cycle1hr[🕐 1-hour Performance Review]
     TimingCycles --> CycleDaily[🕐 Daily Strategic Planning]
+    TimingCycles --> InitialDecisions[🚀 Immediate Initial Decisions]
     
     %% Agent Decision Making Process
     Cycle1min --> AgentDecisionEngine{🧠 Agent Decision Engine}
@@ -33,63 +36,79 @@ graph TB
     Cycle15min --> AgentDecisionEngine
     Cycle1hr --> AgentDecisionEngine
     CycleDaily --> AgentDecisionEngine
+    InitialDecisions --> AgentDecisionEngine
     
     %% Real-time Data Integration
-    ExternalAPIs[🌐 External APIs] --> MarketDataFlow[📊 Live Market Data]
-    ExternalAPIs --> NewsDataFlow[📰 News Feed Data]
-    ExternalAPIs --> PriceDataFlow[💰 Price Data Stream]
+    ExternalAPIs[🌐 External APIs] --> CoinGeckoAPI[� CoinGecko Price API]
+    ExternalAPIs --> NewsAPI[📰 NewsAPI Feed]
+    CoinGeckoAPI --> MarketDataFlow[� Live Market Data]
+    NewsAPI --> NewsDataFlow[📰 News Feed Data]
     
     MarketDataFlow --> AgentDecisionEngine
     NewsDataFlow --> AgentDecisionEngine
-    PriceDataFlow --> AgentDecisionEngine
     
     %% Decision Processing
     AgentDecisionEngine --> DecisionGeneration[⚡ Generate Decision]
-    DecisionGeneration --> ConfidenceCalc[� Calculate Confidence Score]
+    DecisionGeneration --> ConfidenceCalc[📊 Calculate Confidence Score (70-100%)]
     ConfidenceCalc --> ReasoningGen[🧾 Generate Reasoning]
-    ReasoningGen --> ExecutionCheck{✅ Should Execute?}
+    ReasoningGen --> ExecutionCheck{✅ Should Execute? (80% Rate)}
     
     ExecutionCheck -->|Yes (80%)| ExecuteDecision[⚡ Execute Decision]
     ExecutionCheck -->|No (20%)| SkipDecision[⏭️ Skip Decision]
     
-    %% Live Decision Logging
+    %% Live Decision Logging & Statistics
     ExecuteDecision --> LogDecision[📝 Log Decision to Array]
     SkipDecision --> LogDecision
-    LogDecision --> UpdateAgentStats[� Update Agent Statistics]
-    UpdateAgentStats --> DatabaseLog[(�️ Database Logging)]
+    LogDecision --> UpdateAgentStats[📊 Update Agent Statistics]
+    LogDecision --> DecisionBuffer[💾 Decision History Buffer (100 max)]
+    UpdateAgentStats --> AgentPerformance[📈 Agent Performance Tracking]
+    UpdateAgentStats --> DatabaseLog[(🗄️ Database Logging)]
     
-    %% Real-time Dashboard Integration
-    DashboardServe --> DashboardAPI[� Live API Endpoints]
+    %% Complete API Endpoint System
+    DashboardServe --> DashboardAPI[🔌 Complete API Endpoints]
+    DashboardAPI --> BitcoinPriceAPI[/api/bitcoin-price]
+    DashboardAPI --> BitcoinNewsAPI[/api/bitcoin-news]
+    DashboardAPI --> MarketAnalysisAPI[/api/market-analysis]
     DashboardAPI --> AgentStatusAPI[/api/agent-status]
     DashboardAPI --> AgentDecisionsAPI[/api/agent-decisions] 
     DashboardAPI --> AgentLogsAPI[/api/agent-logs]
     DashboardAPI --> PerformanceAPI[/api/performance]
     DashboardAPI --> PortfolioAPI[/api/portfolio]
+    DashboardAPI --> ExecutionProgressAPI[/api/execution-progress]
+    DashboardAPI --> GenerateContentAPI[/api/generate-content]
+    DashboardAPI --> TradeHistoryAPI[/api/trade-history]
+    DashboardAPI --> HealthAPI[/api/health]
     
     %% Live Agent Data Flow
-    UpdateAgentStats --> AgentStatusAPI
-    LogDecision --> AgentDecisionsAPI
+    AgentPerformance --> AgentStatusAPI
+    DecisionBuffer --> AgentDecisionsAPI
     DatabaseLog --> AgentLogsAPI
     
-    %% Dashboard Auto-Refresh
+    %% Dashboard Auto-Refresh System
     DashboardServe --> AutoRefresh[🔄 Auto-refresh every 60s]
-    AutoRefresh --> RefreshAgentStatus[� Refresh Agent Status]
-    AutoRefresh --> RefreshDecisions[� Refresh Recent Decisions]
-    AutoRefresh --> RefreshLogs[� Refresh Execution Logs]
+    AutoRefresh --> RefreshAgentStatus[📊 Refresh Agent Status]
+    AutoRefresh --> RefreshDecisions[💭 Refresh Recent Decisions]
+    AutoRefresh --> RefreshLogs[📋 Refresh Execution Logs]
+    AutoRefresh --> RefreshPortfolio[💰 Refresh Portfolio Data]
     
     RefreshAgentStatus --> AgentStatusAPI
     RefreshDecisions --> AgentDecisionsAPI  
     RefreshLogs --> AgentLogsAPI
+    RefreshPortfolio --> PortfolioAPI
     
     %% Agent Goal-Based Actions
     ExecuteDecision --> ActionRouter{🎯 Action Type Router}
-    ActionRouter -->|Trading Signal| TradingAction[💱 Trading Decision]
-    ActionRouter -->|Content Generation| ContentAction[📝 Content Creation]
-    ActionRouter -->|Risk Management| RiskAction[🛡️ Risk Management]
-    ActionRouter -->|Portfolio Adjustment| PositionAction[📊 Position Sizing]
+    ActionRouter -->|quick_market_check| QuickAction[⚡ Quick Market Signal]
+    ActionRouter -->|detailed_analysis| AnalysisAction[� Technical Analysis]
+    ActionRouter -->|strategy_review| StrategyAction[� Strategy Adjustment]
+    ActionRouter -->|performance_review| PerformanceAction[� Performance Assessment]
+    ActionRouter -->|strategic_planning| PlanningAction[🎯 Strategic Planning]
+    ActionRouter -->|content_planning| ContentAction[� Content Creation]
     
     %% Trading Scenario Integration
-    TradingAction --> ScenarioMatcher{🎯 Match Trading Scenario}
+    QuickAction --> ScenarioMatcher{🎯 Match Trading Scenario}
+    AnalysisAction --> ScenarioMatcher
+    StrategyAction --> ScenarioMatcher
     ScenarioMatcher -->|Bull Market| BullScenario[📈 Bull Market Strategy]
     ScenarioMatcher -->|Bear Market| BearScenario[📉 Bear Market Strategy]
     ScenarioMatcher -->|Range-Bound| RangeScenario[🌊 Range-Bound Strategy]
@@ -117,15 +136,15 @@ graph TB
     FeedbackLoop --> AgentDecisionEngine
     
     %% Live Status Broadcasting
-    UpdateAgentStats --> LiveStatus[📡 Live Agent Status]
-    LiveStatus --> DashboardBroadcast[� Dashboard Real-time Updates]
+    AgentPerformance --> LiveStatus[📡 Live Agent Status]
+    LiveStatus --> DashboardBroadcast[📺 Dashboard Real-time Updates]
     PerformanceCalc --> LivePerformance[📊 Live Performance Metrics]
     LivePerformance --> DashboardBroadcast
     
-    %% Agent Decision History
-    LogDecision --> DecisionHistory[📚 Decision History Buffer]
-    DecisionHistory --> TrendAnalysis[� Decision Trend Analysis]
-    TrendAnalysis --> AgentOptimization[� Agent Performance Optimization]
+    %% Agent Decision History & Optimization
+    DecisionBuffer --> DecisionHistory[📚 Decision History Analysis]
+    DecisionHistory --> TrendAnalysis[📈 Decision Trend Analysis]
+    TrendAnalysis --> AgentOptimization[🔧 Agent Performance Optimization]
     AgentOptimization --> FeedbackLoop
     
     %% 6-Tab Dashboard Integration
@@ -135,6 +154,18 @@ graph TB
     DashboardBroadcast --> Tab4[📋 Execution Logs]
     DashboardBroadcast --> Tab5[📊 Performance Metrics]
     DashboardBroadcast --> Tab6[🎯 Strategic Overview]
+    
+    %% Static File Serving & Additional Routes
+    StaticServing --> PublicFiles[📁 /public Static Files]
+    StaticServing --> DocsFiles[📁 /docs Documentation]
+    StaticServing --> ScenarioRoutes[🎯 Trading Scenario Routes]
+    StaticServing --> DebugRoutes[🔧 Debug & Test Routes]
+    
+    %% Server Health & Monitoring
+    DashboardAPI --> ServerHealth[💚 Server Health Monitoring]
+    ServerHealth --> HealthAPI
+    DatabaseInit --> DBHealth[🗄️ Database Health Check]
+    DBHealth --> ServerHealth
 
     %% Color coding for clarity
     classDef entryPoint fill:#2ecc71,stroke:#27ae60,stroke-width:3px,color:#fff
@@ -145,9 +176,18 @@ graph TB
     classDef data fill:#95a5a6,stroke:#7f8c8d,stroke-width:2px,color:#fff
     classDef api fill:#1abc9c,stroke:#16a085,stroke-width:2px,color:#fff
     classDef dashboard fill:#34495e,stroke:#2c3e50,stroke-width:2px,color:#fff
+    classDef external fill:#e67e22,stroke:#d35400,stroke-width:2px,color:#fff
     
-    class Start,ServerInit,AgentManagerInit entryPoint
+    class Start,EnvLoad,ServerInit,AgentManagerInit entryPoint
     class AgentSystemStart,StrategicOrchestrator,MarketHunter,DataCollector,ContentCreator agentCore
+    class AgentDecisionEngine,DecisionGeneration,ExecutionCheck,ActionRouter,ScenarioMatcher decision
+    class ExecuteDecision,TradeExecution,StrategyExecution execution
+    class TimingCycles,Cycle1min,Cycle5min,Cycle15min,Cycle1hr,CycleDaily timing
+    class MarketDataFlow,NewsDataFlow,DatabaseLog,DecisionHistory,DecisionBuffer data
+    class DashboardAPI,AgentStatusAPI,AgentDecisionsAPI,AgentLogsAPI,BitcoinPriceAPI,BitcoinNewsAPI api
+    class DashboardServe,DashboardBroadcast,Tab1,Tab2,Tab3,Tab4,Tab5,Tab6 dashboard
+    class ExternalAPIs,CoinGeckoAPI,NewsAPI external
+```
     class AgentDecisionEngine,DecisionGeneration,ExecutionCheck,ActionRouter,ScenarioMatcher decision
     class ExecuteDecision,TradeExecution,StrategyExecution execution
     class TimingCycles,Cycle1min,Cycle5min,Cycle15min,Cycle1hr,CycleDaily timing
