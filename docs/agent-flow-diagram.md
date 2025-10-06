@@ -212,7 +212,7 @@ graph TB
 - **Data Collector Agent**: Market data analysis & pattern recognition
 - **Content Creator Agent**: Automated content generation & engagement
 
-#### **⏰ Live Decision Timing Engine**
+#### **⏰ Live Decision Timing Engine (Production)**
 - **1-minute cycles**: Quick market pulse checks & price alerts
 - **5-minute cycles**: Technical analysis & indicator evaluation
 - **15-minute cycles**: Strategy review & risk assessment  
