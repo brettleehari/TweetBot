@@ -1,0 +1,138 @@
+graph TB
+    %% Entry Points
+    Start([🚀 Application Start]) --> NPM{npm command}
+    NPM -->|npm start| Server[📡 real-time-server.js]
+    NPM -->|npm run start:dev| DevServer[🔧 enhanced-24x7-trading.ts]
+    NPM -->|npm run start:production| ProdServer[🏭 Production Mode]
+    
+    %% Server Initialization
+    Server --> Init[🔧 Express App Initialization]
+    Init --> Database[(🗄️ SQLite Database)]
+    Init --> StaticFiles[📁 Static File Serving]
+    Init --> Middleware[🔒 CORS & JSON Middleware]
+    
+    %% Database Setup
+    Database --> Schema[📋 database/schema.sql]
+    Schema --> Tables{Database Tables}
+    Tables --> Trades[(trades)]
+    Tables --> Portfolio[(portfolio)]
+    Tables --> MarketData[(market_data)]
+    Tables --> AgentExec[(agent_executions)]
+    Tables --> AgentDec[(agent_decisions)]
+    Tables --> NewsAnalysis[(news_analysis)]
+    
+    %% Static File Routes
+    StaticFiles --> PublicRoute[📂 /public → public/index.html]
+    StaticFiles --> DocsRoute[📂 /docs → docs/]
+    
+    %% API Endpoints
+    Server --> APIRoutes{🔗 API Endpoints}
+    APIRoutes --> BitcoinPriceAPI[/api/bitcoin-price]
+    APIRoutes --> BitcoinNewsAPI[/api/bitcoin-news]
+    APIRoutes --> MarketAnalysisAPI[/api/market-analysis]
+    APIRoutes --> AgentStatusAPI[/api/agent-status]
+    APIRoutes --> PerformanceAPI[/api/performance]
+    APIRoutes --> PortfolioAPI[/api/portfolio]
+    APIRoutes --> AgentLogsAPI[/api/agent-logs]
+    APIRoutes --> TradeHistoryAPI[/api/trade-history]
+    APIRoutes --> HealthAPI[/api/health]
+    
+    %% External Data Sources
+    BitcoinPriceAPI --> CoinGecko[🌐 CoinGecko API]
+    BitcoinNewsAPI --> NewsAPI[📰 NewsAPI]
+    
+    %% Frontend Entry
+    PublicRoute --> Dashboard[🖥️ Bitcoin Trading Dashboard]
+    Dashboard --> DOMLoaded[📱 DOMContentLoaded Event]
+    
+    %% Frontend Initialization
+    DOMLoaded --> InitChart[📊 Initialize Chart.js]
+    DOMLoaded --> RefreshData[🔄 refreshAllData function]
+    DOMLoaded --> SetInterval[⏰ 60-second refresh interval]
+    
+    %% Data Loading Functions
+    RefreshData --> LoadPrice[💰 loadPriceData]
+    RefreshData --> LoadAgent[🤖 loadAgentStatus]
+    RefreshData --> LoadPortfolio[💼 loadPortfolioData]
+    RefreshData --> LoadPerformance[📈 loadPerformanceData]
+    RefreshData --> LoadHistory[📋 loadDecisionHistory]
+    RefreshData --> LoadProgress[🎯 loadExecutionProgress]
+    
+    %% API Calls from Frontend
+    LoadPrice -->|fetch| BitcoinPriceAPI
+    LoadAgent -->|fetch| AgentStatusAPI
+    LoadPortfolio -->|fetch| PortfolioAPI
+    LoadPerformance -->|fetch| PerformanceAPI
+    LoadHistory -->|fetch| AgentLogsAPI
+    LoadProgress -->|fetch| APIRoutes
+    
+    %% Trading Scenarios Integration
+    Dashboard --> TradingScenarios[🎯 Trading Scenarios Section]
+    TradingScenarios --> TabNav[🧭 6 Navigation Tabs]
+    TabNav --> BullTab[📈 Bull Market]
+    TabNav --> BearTab[📉 Bear Market]
+    TabNav --> RangeTab[🌊 Range-Bound]
+    TabNav --> RiskTab[🛡️ Risk Management]
+    TabNav --> PositionTab[📊 Position Sizing]
+    TabNav --> PerfTab[🏆 Performance]
+    
+    %% Tab Functionality
+    TabNav -->|onclick| ShowTab[🔄 showTab function]
+    ShowTab --> HideAll[👁️ Hide all content]
+    ShowTab --> ShowSelected[✅ Show selected tab]
+    ShowTab --> UpdateNav[🎨 Update navigation styling]
+    
+    %% Real-time Updates
+    SetInterval --> RefreshData
+    RefreshData --> UpdateUI[🔄 Update Dashboard UI]
+    UpdateUI --> PriceUpdate[💰 Price Display]
+    UpdateUI --> PortfolioUpdate[💼 Portfolio Values]
+    UpdateUI --> ChartUpdate[📊 Portfolio Chart]
+    UpdateUI --> AgentUpdate[🤖 Agent Status]
+    
+    %% Database Operations
+    APIRoutes --> DBService[🔧 DatabaseService]
+    DBService --> DBQueries[📝 SQL Queries]
+    DBQueries --> SQLite[(🗄️ SQLite Database)]
+    
+    %% Error Handling
+    LoadPrice -->|error| ErrorPrice[❌ Connection Error]
+    LoadAgent -->|error| ErrorAgent[❌ System Error]
+    Server -->|error| ServerError[💥 Server Error]
+    
+    %% User Interactions
+    Dashboard --> UserClick[👆 User Interactions]
+    UserClick --> TabClick[🎯 Tab Navigation]
+    UserClick --> ButtonClick[🔘 Control Buttons]
+    ButtonClick --> DownloadTrades[📥 Download History]
+    ButtonClick --> ExportPortfolio[📤 Export Portfolio]
+    
+    %% CSS Styling
+    Dashboard --> Styling[🎨 CSS Styling]
+    Styling --> GlassMorphism[✨ Glass-morphism Effects]
+    Styling --> Gradients[🌈 Color Gradients]
+    Styling --> Animations[🎭 Hover & Transition Effects]
+    Styling --> Responsive[📱 Mobile Responsive]
+    
+    %% Chart Integration
+    InitChart --> ChartJS[📊 Chart.js Library]
+    ChartJS --> PortfolioChart[📈 Portfolio Performance Chart]
+    PortfolioChart --> GradientFill[🌈 Gradient Fill]
+    PortfolioChart --> RealTimeData[⚡ Real-time Data Points]
+
+    %% Color coding
+    classDef entryPoint fill:#2ecc71,stroke:#27ae60,stroke-width:3px,color:#fff
+    classDef server fill:#3498db,stroke:#2980b9,stroke-width:2px,color:#fff
+    classDef database fill:#9b59b6,stroke:#8e44ad,stroke-width:2px,color:#fff
+    classDef api fill:#e67e22,stroke:#d35400,stroke-width:2px,color:#fff
+    classDef frontend fill:#f39c12,stroke:#e67e22,stroke-width:2px,color:#fff
+    classDef external fill:#95a5a6,stroke:#7f8c8d,stroke-width:2px,color:#fff
+    classDef error fill:#e74c3c,stroke:#c0392b,stroke-width:2px,color:#fff
+    
+    class Start,NPM entryPoint
+    class Server,DevServer,ProdServer,Init server
+    class Database,Schema,Tables,Trades,Portfolio,MarketData,AgentExec,AgentDec,NewsAnalysis,SQLite database
+    class APIRoutes,BitcoinPriceAPI,BitcoinNewsAPI,MarketAnalysisAPI,AgentStatusAPI,PerformanceAPI,PortfolioAPI,AgentLogsAPI,TradeHistoryAPI,HealthAPI api
+    class Dashboard,DOMLoaded,TradingScenarios,TabNav,RefreshData,LoadPrice,LoadAgent,LoadPortfolio,LoadPerformance,LoadHistory frontend
+    class CoinGecko,NewsAPI external
+    class ErrorPrice,ErrorAgent,ServerError error
