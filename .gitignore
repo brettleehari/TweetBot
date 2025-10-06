@@ -6,3 +6,12 @@ dist
 .env
 *.db
 *.db-*
+
+# Development and logs
+dev-*.json
+logs/*.jsonl
+server.log
+*.log
+trading-*.json
+production-trading-*.json
+
