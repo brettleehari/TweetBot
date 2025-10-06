@@ -1,16 +1,23 @@
--- Bitcoin Trading Database Schema
--- Created: October 2, 2025
--- Purpose: Store real trading data and agent execution logs
+-- Finalized Bitcoin Trading Database Schema
+-- Design Version: 3.0
+-- Purpose: Store real trading data, agent execution logs, and maintain a transactionally-safe portfolio.
 
+-- The live state of the portfolio. Only ever contains one row.
 CREATE TABLE IF NOT EXISTS portfolio (
+    id INTEGER PRIMARY KEY, -- Always 1
+    btc_balance REAL NOT NULL,
+    usd_balance REAL NOT NULL,
+    last_updated DATETIME NOT NULL
+);
+
+-- Periodic snapshots of portfolio value for analytics.
+CREATE TABLE IF NOT EXISTS portfolio_history (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-    btc_holdings DECIMAL(10,8) NOT NULL,
-    usd_balance DECIMAL(12,2) NOT NULL,
-    total_value_usd DECIMAL(12,2) NOT NULL,
-    total_profit_usd DECIMAL(12,2) DEFAULT 0,
-    profit_percentage DECIMAL(5,2) DEFAULT 0,
-    last_updated DATETIME DEFAULT CURRENT_TIMESTAMP
+    btc_balance REAL NOT NULL,
+    usd_balance REAL NOT NULL,
+    btc_price_usd REAL NOT NULL, -- Price at the time of snapshot
+    total_value_usd REAL NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS trades (
@@ -95,12 +102,13 @@ CREATE TABLE IF NOT EXISTS news_analysis (
     analyzed_by VARCHAR(50) DEFAULT 'market-analyzer'
 );
 
--- Insert initial portfolio data
-INSERT OR REPLACE INTO portfolio (id, btc_holdings, usd_balance, total_value_usd) 
-VALUES (1, 0.0, 100000.0, 100000.0);
+-- Initialize the single row for the portfolio's live state
+INSERT OR REPLACE INTO portfolio (id, btc_balance, usd_balance, last_updated) 
+VALUES (1, 0.0, 100000.0, CURRENT_TIMESTAMP);
 
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_trades_timestamp ON trades(timestamp);
 CREATE INDEX IF NOT EXISTS idx_market_data_timestamp ON market_data(timestamp);
 CREATE INDEX IF NOT EXISTS idx_agent_executions_timestamp ON agent_executions(timestamp);
 CREATE INDEX IF NOT EXISTS idx_news_analysis_timestamp ON news_analysis(timestamp);
+CREATE INDEX IF NOT EXISTS idx_portfolio_history_timestamp ON portfolio_history(timestamp);
