@@ -59,18 +59,18 @@ graph TB
     
     %% Complete API Endpoint System
     DashboardServe --> DashboardAPI[🔌 Complete API Endpoints]
-    DashboardAPI --> BitcoinPriceAPI[/api/bitcoin-price]
-    DashboardAPI --> BitcoinNewsAPI[/api/bitcoin-news]
-    DashboardAPI --> MarketAnalysisAPI[/api/market-analysis]
-    DashboardAPI --> AgentStatusAPI[/api/agent-status]
-    DashboardAPI --> AgentDecisionsAPI[/api/agent-decisions]
-    DashboardAPI --> AgentLogsAPI[/api/agent-logs]
-    DashboardAPI --> PerformanceAPI[/api/performance]
-    DashboardAPI --> PortfolioAPI[/api/portfolio]
-    DashboardAPI --> ExecutionProgressAPI[/api/execution-progress]
-    DashboardAPI --> GenerateContentAPI[/api/generate-content]
-    DashboardAPI --> TradeHistoryAPI[/api/trade-history]
-    DashboardAPI --> HealthAPI[/api/health]
+    DashboardAPI --> BitcoinPriceAPI["/api/bitcoin-price"]
+    DashboardAPI --> BitcoinNewsAPI["/api/bitcoin-news"]
+    DashboardAPI --> MarketAnalysisAPI["/api/market-analysis"]
+    DashboardAPI --> AgentStatusAPI["/api/agent-status"]
+    DashboardAPI --> AgentDecisionsAPI["/api/agent-decisions"]
+    DashboardAPI --> AgentLogsAPI["/api/agent-logs"]
+    DashboardAPI --> PerformanceAPI["/api/performance"]
+    DashboardAPI --> PortfolioAPI["/api/portfolio"]
+    DashboardAPI --> ExecutionProgressAPI["/api/execution-progress"]
+    DashboardAPI --> GenerateContentAPI["/api/generate-content"]
+    DashboardAPI --> TradeHistoryAPI["/api/trade-history"]
+    DashboardAPI --> HealthAPI["/api/health"]
     
     %% Live Agent Data Flow
     AgentPerformance --> AgentStatusAPI
