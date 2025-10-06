@@ -131,11 +131,205 @@
         .confidence-medium { background: #f39c12; color: white; }
         .confidence-low { background: #e74c3c; color: white; }
         .timestamp { font-size: 0.9rem; color: #bdc3c7; font-style: italic; }
+
+        /* Trading Scenarios Styles */
+        .scenarios-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .scenarios-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .scenarios-header h2 {
+            color: #2ecc71;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #2ecc71, #3498db);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .scenarios-header p {
+            color: #bdc3c7;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+        }
+
+        .nav-tab {
+            background: linear-gradient(135deg, #2ecc71, #3498db);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+        }
+
+        .nav-tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, #3498db, #2ecc71);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tab-content h3 {
+            color: #2ecc71;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .strategy-summary {
+            background: rgba(46, 204, 113, 0.1);
+            border-left: 4px solid #2ecc71;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .strategy-summary p {
+            margin: 8px 0;
+            color: #ecf0f1;
+            font-weight: 500;
+        }
+
+        .key-principles {
+            margin: 25px 0;
+        }
+
+        .key-principles h4 {
+            color: #3498db;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .key-principles ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .key-principles li {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 15px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border-left: 3px solid #2ecc71;
+            color: #bdc3c7;
+            line-height: 1.5;
+        }
+
+        .example-calculation {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(46, 204, 113, 0.1));
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .example-calculation h4 {
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+
+        .example-calculation p {
+            color: #ecf0f1;
+            margin: 8px 0;
+        }
+
+        .performance-benchmarks {
+            margin: 25px 0;
+        }
+
+        .benchmark-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .benchmark-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .benchmark-label {
+            color: #bdc3c7;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .benchmark-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ecf0f1;
+        }
+
+        .benchmark-value.expert {
+            color: #2ecc71;
+            text-shadow: 1px 1px 2px rgba(46, 204, 113, 0.3);
+        }
+
         @media (max-width: 768px) {
             .container { padding: 15px; }
             .header h1 { font-size: 2rem; }
             .grid { grid-template-columns: 1fr; }
             .btn { width: 100%; max-width: 300px; justify-content: center; }
+            .nav-tabs {
+                flex-direction: column;
+            }
+            
+            .nav-tab {
+                text-align: center;
+                font-size: 0.9rem;
+                padding: 10px 15px;
+            }
+            
+            .benchmark-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -246,6 +440,153 @@
             </div>
         </div>
 
+        <!-- 🎯 Expert Trading Scenarios Section -->
+        <div class="scenarios-section">
+            <div class="scenarios-header">
+                <h2>🎯 Expert Trading Scenarios</h2>
+                <p>Professional-level decision trees and risk management strategies</p>
+            </div>
+            
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="showTab('bull-scenarios')">📈 Bull Market</button>
+                <button class="nav-tab" onclick="showTab('bear-scenarios')">📉 Bear Market</button>
+                <button class="nav-tab" onclick="showTab('range-scenarios')">🌊 Range-Bound</button>
+                <button class="nav-tab" onclick="showTab('risk-management')">🛡️ Risk Management</button>
+                <button class="nav-tab" onclick="showTab('position-sizing')">📊 Position Sizing</button>
+                <button class="nav-tab" onclick="showTab('performance')">🏆 Performance</button>
+            </div>
+
+            <!-- Tab Contents -->
+            <div id="bull-scenarios" class="tab-content active">
+                <h3>📈 Bull Market Strategies</h3>
+                <div class="strategy-summary">
+                    <p><strong>Strategy:</strong> Trend-following with volume confirmation</p>
+                    <p><strong>Risk Level:</strong> Standard (2% max per trade)</p>
+                    <p><strong>Entry Criteria:</strong> RSI &lt; 70, high volume, momentum confirmation</p>
+                </div>
+                <div class="key-principles">
+                    <h4>Key Principles:</h4>
+                    <ul>
+                        <li>Volume confirmation is crucial - price moves without volume are often false signals</li>
+                        <li>Position size: 2% risk maximum for confirmed trends</li>
+                        <li>RSI levels determine entry timing (&lt;70 optimal, 70-80 partial, &gt;80 wait)</li>
+                        <li>Stop loss: -2% for confirmed trends, take profit: +4%</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="bear-scenarios" class="tab-content">
+                <h3>📉 Bear Market Strategies</h3>
+                <div class="strategy-summary">
+                    <p><strong>Strategy:</strong> Capital preservation and selective short opportunities</p>
+                    <p><strong>Risk Level:</strong> Reduced (0.5-1% max per trade)</p>
+                    <p><strong>Focus:</strong> Risk control and drawdown management</p>
+                </div>
+                <div class="key-principles">
+                    <h4>Key Principles:</h4>
+                    <ul>
+                        <li>Capital preservation is more important than profits during downtrends</li>
+                        <li>Extreme volatility (&gt;5%) requires minimal position sizes (0.5%)</li>
+                        <li>Tight risk control with quick profit taking on any short positions</li>
+                        <li>Cash position preferred during high volatility periods</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="range-scenarios" class="tab-content">
+                <h3>🌊 Range-Bound Strategies</h3>
+                <div class="strategy-summary">
+                    <p><strong>Strategy:</strong> Mean reversion - buy support, sell resistance</p>
+                    <p><strong>Risk Level:</strong> Moderate (1-1.5% max per trade)</p>
+                    <p><strong>Range Width:</strong> Requires &gt;2% range for profitability</p>
+                </div>
+                <div class="key-principles">
+                    <h4>Key Principles:</h4>
+                    <ul>
+                        <li>Wide ranges (&gt;5%) offer better risk/reward ratios</li>
+                        <li>Buy near support levels, sell near resistance levels</li>
+                        <li>Quick scalping strategies for tight ranges (&lt;2%)</li>
+                        <li>Range trading requires patience and discipline</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="risk-management" class="tab-content">
+                <h3>🛡️ Risk Management</h3>
+                <div class="strategy-summary">
+                    <p><strong>Focus:</strong> Drawdown control and position sizing rules</p>
+                    <p><strong>Max Drawdown:</strong> 10% portfolio emergency stop</p>
+                    <p><strong>Daily Loss Limit:</strong> 5% maximum per day</p>
+                </div>
+                <div class="key-principles">
+                    <h4>Professional Risk Standards:</h4>
+                    <ul>
+                        <li>Maximum 2% risk per trade (never exceed)</li>
+                        <li>Total portfolio exposure: Maximum 20% in BTC</li>
+                        <li>Drawdown limits: &lt;5% normal, 5-10% reduce risk, &gt;10% emergency stop</li>
+                        <li>Stop losses always required - no exceptions</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="position-sizing" class="tab-content">
+                <h3>📊 Position Sizing</h3>
+                <div class="strategy-summary">
+                    <p><strong>Formula:</strong> Position Size = Risk Amount ÷ (Entry Price - Stop Loss)</p>
+                    <p><strong>Account Risk:</strong> 2% of total portfolio per trade</p>
+                    <p><strong>Leverage:</strong> Maximum 3x (experts prefer 1-3x)</p>
+                </div>
+                <div class="key-principles">
+                    <h4>Mathematical Approach:</h4>
+                    <ul>
+                        <li>Risk Amount = Account Balance × 2% (never exceed)</li>
+                        <li>Price Risk = Entry Price - Stop Loss Price</li>
+                        <li>Position Size = Risk Amount ÷ Price Risk</li>
+                        <li>Account for leverage restrictions and margin requirements</li>
+                    </ul>
+                </div>
+                <div class="example-calculation">
+                    <h4>Example: BTC @ $60,000, Stop @ $58,800</h4>
+                    <p>Account: $100,000 | Risk: $2,000 (2%) | Price Risk: $1,200</p>
+                    <p><strong>Position Size: $2,000 ÷ $1,200 = 1.67 BTC</strong></p>
+                </div>
+            </div>
+
+            <div id="performance" class="tab-content">
+                <h3>🏆 Performance Metrics</h3>
+                <div class="strategy-summary">
+                    <p><strong>Target:</strong> Risk-adjusted returns over absolute gains</p>
+                    <p><strong>Sharpe Ratio:</strong> Minimum 1.5 (Expert &gt;2.0)</p>
+                    <p><strong>Max Drawdown:</strong> Maximum 15% (Expert &lt;10%)</p>
+                </div>
+                <div class="performance-benchmarks">
+                    <h4>Professional Benchmarks:</h4>
+                    <div class="benchmark-grid">
+                        <div class="benchmark-item">
+                            <div class="benchmark-label">Sharpe Ratio</div>
+                            <div class="benchmark-value expert">&gt; 1.5</div>
+                        </div>
+                        <div class="benchmark-item">
+                            <div class="benchmark-label">Max Drawdown</div>
+                            <div class="benchmark-value expert">&lt; 15%</div>
+                        </div>
+                        <div class="benchmark-item">
+                            <div class="benchmark-label">Win Rate</div>
+                            <div class="benchmark-value expert">&gt; 45%</div>
+                        </div>
+                        <div class="benchmark-item">
+                            <div class="benchmark-label">Profit Factor</div>
+                            <div class="benchmark-value expert">&gt; 1.5</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="key-principles">
+                    <h4>Expert Principle:</h4>
+                    <p><em>A trader with 30% annual return and 10% max drawdown (Sharpe &gt; 2) is better than one with 200% return and 70% drawdown.</em></p>
+                </div>
+            </div>
+        </div>
+
         <div class="card chart-container">
             <h3><i class="fas fa-chart-area card-icon"></i> Portfolio Performance</h3>
             <canvas id="portfolioChart"></canvas>
@@ -277,6 +618,35 @@
         let currentPrice = 0;
         let cashBalance = 0;  // Will be loaded from database
         let btcHoldings = 0;  // Will be loaded from database
+
+        // Tab switching function for trading scenarios
+        function showTab(tabId) {
+            // Hide all tab contents
+            const allTabs = document.querySelectorAll('.tab-content');
+            allTabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Remove active class from all nav tabs
+            const allNavTabs = document.querySelectorAll('.nav-tab');
+            allNavTabs.forEach(navTab => {
+                navTab.classList.remove('active');
+            });
+
+            // Show selected tab content
+            const selectedTab = document.getElementById(tabId);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+            }
+
+            // Add active class to clicked nav tab
+            const clickedNavTab = event.target;
+            if (clickedNavTab) {
+                clickedNavTab.classList.add('active');
+            }
+
+            console.log(`✅ Switched to tab: ${tabId}`);
+        }
 
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Dashboard initializing...');
@@ -574,101 +944,53 @@
 
         async function loadDecisionHistory() {
             try {
-                const response = await fetch('/api/agent-logs?limit=10');
+                // 🔥 Updated to use the new live agent decisions endpoint
+                const response = await fetch('/api/agent-decisions?limit=10');
                 const result = await response.json();
                 
                 if (result.success && result.data.length > 0) {
-                    const decisions = result.data.filter(log => 
-                        log.type === 'trading_decision' || 
-                        log.type === 'market_analysis' ||
-                        log.agent === 'bitcoin-orchestrator'
-                    );
+                    const decisions = result.data;
                     
                     const container = document.getElementById('decision-history');
-                    
-                    if (decisions.length === 0) {
-                        container.innerHTML = `
-                            <div style="padding: 20px; text-align: center; color: #bdc3c7;">
-                                <i class="fas fa-clock"></i> No AI decisions recorded yet.<br>
-                                <small>Agent decisions will appear here as they are made.</small>
-                            </div>
-                        `;
-                        return;
-                    }
                     
                     container.innerHTML = decisions.map(decision => {
                         const timestamp = new Date(decision.timestamp);
                         
-                        // Use enhanced details if available
-                        const details = decision.details || {};
-                        const output = decision.output || {};
-                        const input = decision.input || {};
-                        const marketIntelligence = input.marketIntelligence || {};
-                        const progressMetrics = input.progressMetrics || {};
-                        
-                        const action = details.action || output.action || 'ANALYZE';
-                        const amount = details.amount || output.amount || 0;
-                        const price = details.price || output.price || 0;
-                        const confidence = details.confidence || output.confidence || 0;
-                        const reasoning = details.reasoning || output.reasoning || decision.error || 'Processing market data...';
-                        const urgency = details.urgency || output.urgency || 'NORMAL';
-                        const progressPercent = details.progressPercent || progressMetrics.progressPercent || 'N/A';
-                        const marketBasis = output.marketBasis || '';
-                        
-                        // Market Intelligence Data
-                        const sentiment = marketIntelligence.sentiment || {};
-                        const sentimentScore = sentiment.score || 0;
-                        const sentimentOverall = sentiment.overall || 'unknown';
-                        const newsCount = sentiment.newsCount || marketIntelligence.newsCount || 0;
-                        const impactScore = marketIntelligence.impactScore || 0;
-                        const trend = marketIntelligence.trend || 'unknown';
-                        const volatility = marketIntelligence.volatility || 'unknown';
-                        
-                        // Progress Metrics
-                        const currentReturn = progressMetrics.currentReturn ? (progressMetrics.currentReturn * 100).toFixed(2) : 'N/A';
-                        const targetReturn = progressMetrics.targetReturn ? (progressMetrics.targetReturn * 100).toFixed(0) : '5';
-                        const daysRemaining = progressMetrics.daysRemaining || 'N/A';
-                        const isOnTrack = progressMetrics.isOnTrack;
-                        const portfolioValue = input.portfolioValue ? '$' + input.portfolioValue.toFixed(2) : 'N/A';
+                        // Use the new decision format from AgentManager
+                        const action = decision.action || 'ANALYZE';
+                        const confidence = decision.confidence || 0;
+                        const reasoning = decision.reasoning || 'Processing market data...';
+                        const executed = decision.executed;
+                        const portfolioValue = decision.portfolioValue ? '$' + decision.portfolioValue.toFixed(2) : 'N/A';
                         
                         const confidenceClass = confidence >= 80 ? 'confidence-high' : 
                                               confidence >= 60 ? 'confidence-medium' : 'confidence-low';
                         
-                        const actionIcon = action === 'BUY' ? '🟢' : 
-                                         action === 'SELL' ? '🔴' : '🔍';
+                        const actionIcon = action.includes('BUY') ? '🟢' : 
+                                         action.includes('SELL') ? '🔴' : 
+                                         action.includes('HOLD') ? '🔵' :
+                                         action.includes('MONITOR') ? '�' : '📊';
                         
-                        const successIcon = decision.success ? '✅' : '❌';
+                        const successIcon = executed ? '✅' : '⏭️';
+                        const statusText = executed ? 'EXECUTED' : 'SKIPPED';
                         
-                        const urgencyIcon = urgency === 'HIGH' ? '🚨' : 
-                                          urgency === 'MEDIUM' ? '⚠️' : '📊';
-
-                        const sentimentIcon = sentimentOverall === 'positive' ? '📈' : 
-                                            sentimentOverall === 'negative' ? '📉' : '📊';
-                        
-                        const trendIcon = trend === 'bullish' ? '🔥' : 
-                                        trend === 'bearish' ? '❄️' : '⚖️';
-
                         return `
-                            <div class="decision-entry ${action.toLowerCase()}">
+                            <div class="decision-entry ${action.toLowerCase().replace('_', '-')}">
                                 <div class="decision-header">
                                     <div class="decision-action">
-                                        ${actionIcon} ${action} ${successIcon} ${urgencyIcon}
+                                        ${actionIcon} ${action} ${successIcon}
                                     </div>
                                     <div class="timestamp">${timestamp.toISOString().replace('T', ' ').slice(0, 19)} GMT</div>
                                 </div>
                                 
-                                <!-- Confidence & Progress Row -->
+                                <!-- Status & Confidence Row -->
                                 <div style="margin: 10px 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
-                                    ${confidence > 0 ? `
-                                        <span class="confidence-badge ${confidenceClass}">
-                                            ${confidence}% Confidence
-                                        </span>
-                                    ` : ''}
-                                    ${progressPercent !== 'N/A' ? `
-                                        <span style="padding: 2px 8px; background: ${isOnTrack ? 'rgba(46, 204, 113, 0.2)' : 'rgba(241, 196, 15, 0.2)'}; border-radius: 4px; font-size: 0.8rem;">
-                                            Progress: ${progressPercent}% ${isOnTrack ? '✅' : '⚠️'}
-                                        </span>
-                                    ` : ''}
+                                    <span class="confidence-badge ${confidenceClass}">
+                                        ${confidence}% Confidence
+                                    </span>
+                                    <span style="padding: 2px 8px; background: ${executed ? 'rgba(46, 204, 113, 0.2)' : 'rgba(241, 196, 15, 0.2)'}; border-radius: 4px; font-size: 0.8rem;">
+                                        ${statusText}
+                                    </span>
                                     ${portfolioValue !== 'N/A' ? `
                                         <span style="padding: 2px 8px; background: rgba(155, 89, 182, 0.2); border-radius: 4px; font-size: 0.8rem;">
                                             Portfolio: ${portfolioValue}
@@ -676,98 +998,27 @@
                                     ` : ''}
                                 </div>
 
-                                <!-- Market Intelligence Grid -->
-                                ${newsCount > 0 || sentimentScore !== 0 || impactScore > 0 ? `
-                                    <div style="margin: 15px 0; padding: 12px; background: rgba(52, 73, 94, 0.3); border-radius: 8px; border-left: 3px solid #3498db;">
-                                        <div style="font-weight: 600; margin-bottom: 8px; color: #3498db;">
-                                            🧠 Market Intelligence Analysis
-                                        </div>
-                                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; font-size: 0.85rem;">
-                                            ${newsCount > 0 ? `
-                                                <div>
-                                                    <strong>📰 News:</strong> ${newsCount} items
-                                                </div>
-                                            ` : ''}
-                                            ${sentimentScore !== 0 ? `
-                                                <div>
-                                                    <strong>${sentimentIcon} Sentiment:</strong> ${sentimentOverall} (${sentimentScore.toFixed(3)})
-                                                </div>
-                                            ` : ''}
-                                            ${impactScore > 0 ? `
-                                                <div>
-                                                    <strong>💥 Impact:</strong> ${impactScore}/100
-                                                </div>
-                                            ` : ''}
-                                            ${trend !== 'unknown' ? `
-                                                <div>
-                                                    <strong>${trendIcon} Trend:</strong> ${trend}
-                                                </div>
-                                            ` : ''}
-                                            ${volatility !== 'unknown' ? `
-                                                <div>
-                                                    <strong>📊 Volatility:</strong> ${volatility}
-                                                </div>
-                                            ` : ''}
-                                        </div>
-                                    </div>
-                                ` : ''}
-
-                                <!-- Decision Details -->
+                                <!-- Agent & Decision Details -->
                                 <div style="margin: 10px 0;">
-                                    <div style="font-weight: 600; margin-bottom: 5px;">Agent: ${decision.agent}</div>
-                                    <div style="margin-bottom: 8px;">${reasoning}</div>
-                                    
-                                    ${marketBasis ? `
-                                        <div style="padding: 8px; background: rgba(230, 126, 34, 0.15); border-radius: 6px; font-size: 0.85rem; margin-top: 8px;">
-                                            <strong>📊 Market Basis:</strong> ${marketBasis}
-                                        </div>
-                                    ` : ''}
-                                    
-                                    ${amount > 0 && price > 0 ? `
-                                        <div style="margin-top: 8px; font-size: 0.9rem; color: #3498db;">
-                                            Amount: ${amount.toFixed(4)} BTC @ $${price.toFixed(2)} (${(amount * price).toFixed(2)} USD)
-                                        </div>
-                                    ` : ''}
-                                </div>
-
-                                <!-- Performance Metrics -->
-                                ${currentReturn !== 'N/A' || daysRemaining !== 'N/A' ? `
-                                    <div style="margin: 12px 0; padding: 10px; background: rgba(46, 204, 113, 0.1); border-radius: 6px;">
-                                        <div style="font-weight: 600; margin-bottom: 6px; color: #27ae60;">
-                                            🎯 Performance Tracking
-                                        </div>
-                                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; font-size: 0.8rem;">
-                                            ${currentReturn !== 'N/A' ? `
-                                                <div><strong>Current:</strong> ${currentReturn}%</div>
-                                            ` : ''}
-                                            <div><strong>Target:</strong> ${targetReturn}%</div>
-                                            ${daysRemaining !== 'N/A' ? `
-                                                <div><strong>Days Left:</strong> ${daysRemaining}</div>
-                                            ` : ''}
-                                        </div>
+                                    <div style="font-weight: 600; margin-bottom: 5px; color: #3498db;">
+                                        � Agent: ${decision.agentName || decision.agent}
                                     </div>
-                                ` : ''}
-
-                                ${output.signals ? `
-                                    <div style="margin-top: 8px;">
-                                        <div style="font-size: 0.85rem; color: #95a5a6;">
-                                            Signals: ${output.signals.join(', ')}
-                                        </div>
+                                    <div style="margin-bottom: 8px; padding: 8px; background: rgba(52, 73, 94, 0.3); border-radius: 6px;">
+                                        💭 <strong>Reasoning:</strong> ${reasoning}
                                     </div>
-                                ` : ''}
-                                
-                                <div style="font-size: 0.8rem; color: #7f8c8d; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1);">
-                                    ${decision.executionTime ? `Execution: ${decision.executionTime}ms | ` : ''}
-                                    Urgency: ${urgency} | ID: ${decision.id}
+                                    <div style="font-size: 0.85rem; color: #95a5a6;">
+                                        � Action Type: ${decision.actionType || 'market_analysis'} | 
+                                        🆔 Decision ID: ${decision.id}
+                                    </div>
                                 </div>
                             </div>
                         `;
                     }).join('');
                 } else {
-                    // No real data available yet
-                    document.getElementById('decision-history').innerHTML = `
+                    const container = document.getElementById('decision-history');
+                    container.innerHTML = `
                         <div style="padding: 20px; text-align: center; color: #bdc3c7;">
-                            <i class="fas fa-robot"></i> AI Trading Engine Initializing...<br>
+                            <i class="fas fa-robot"></i> No AI decisions recorded yet.<br>
                             <small>Agents are analyzing market conditions. Decisions will appear here shortly.</small>
                         </div>
                     `;
