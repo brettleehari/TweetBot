@@ -212,6 +212,201 @@
             font-size: 0.9rem;
             overflow-x: auto;
         }
+
+        /* Trading Scenarios Styles */
+        .scenarios-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .scenarios-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .scenarios-header h2 {
+            color: #667eea;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .scenarios-header p {
+            color: #4a5568;
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .nav-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+
+        .nav-tab {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(118, 75, 162, 0.4);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tab-content h3 {
+            color: #667eea;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .strategy-summary {
+            background: #f7fafc;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .strategy-summary p {
+            margin: 8px 0;
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        .key-principles {
+            margin: 25px 0;
+        }
+
+        .key-principles h4 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .key-principles ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .key-principles li {
+            background: #edf2f7;
+            padding: 12px 15px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+            color: #4a5568;
+            line-height: 1.5;
+        }
+
+        .example-calculation {
+            background: linear-gradient(135deg, #e8f4fd 0%, #f0f8ff 100%);
+            border: 1px solid #bee3f8;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .example-calculation h4 {
+            color: #2b6cb0;
+            margin-bottom: 15px;
+        }
+
+        .example-calculation p {
+            color: #2d3748;
+            margin: 8px 0;
+        }
+
+        .performance-benchmarks {
+            margin: 25px 0;
+        }
+
+        .benchmark-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .benchmark-item {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .benchmark-label {
+            color: #4a5568;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .benchmark-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2d3748;
+        }
+
+        .benchmark-value.expert {
+            color: #38a169;
+            text-shadow: 1px 1px 2px rgba(56, 161, 105, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .nav-tabs {
+                flex-direction: column;
+            }
+            
+            .nav-tab {
+                text-align: center;
+                font-size: 0.9rem;
+                padding: 10px 15px;
+            }
+            
+            .benchmark-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -230,6 +425,153 @@
                 <button class="btn" onclick="testAgentPerformance()">🤖 Agent Test</button>
                 <button class="btn" onclick="generateContent()">📝 Generate Content</button>
             </div>
+
+        <!-- 🎯 Expert Trading Scenarios Section -->
+        <div class="scenarios-section">
+            <div class="scenarios-header">
+                <h2>🎯 Expert Trading Scenarios</h2>
+                <p>Professional-level decision trees and risk management strategies</p>
+            </div>
+            
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="showTab('bull-scenarios')">📈 Bull Market</button>
+                <button class="nav-tab" onclick="showTab('bear-scenarios')">📉 Bear Market</button>
+                <button class="nav-tab" onclick="showTab('range-scenarios')">🌊 Range-Bound</button>
+                <button class="nav-tab" onclick="showTab('risk-management')">🛡️ Risk Management</button>
+                <button class="nav-tab" onclick="showTab('position-sizing')">📊 Position Sizing</button>
+                <button class="nav-tab" onclick="showTab('performance')">🏆 Performance</button>
+            </div>
+
+            <!-- Tab Contents -->
+            <div id="bull-scenarios" class="tab-content active">
+                <h3>📈 Bull Market Strategies</h3>
+                <div class="strategy-summary">
+                    <p><strong>Strategy:</strong> Trend-following with volume confirmation</p>
+                    <p><strong>Risk Level:</strong> Standard (2% max per trade)</p>
+                    <p><strong>Entry Criteria:</strong> RSI &lt; 70, high volume, momentum confirmation</p>
+                </div>
+                <div class="key-principles">
+                    <h4>Key Principles:</h4>
+                    <ul>
+                        <li>Volume confirmation is crucial - price moves without volume are often false signals</li>
+                        <li>Position size: 2% risk maximum for confirmed trends</li>
+                        <li>RSI levels determine entry timing (&lt;70 optimal, 70-80 partial, &gt;80 wait)</li>
+                        <li>Stop loss: -2% for confirmed trends, take profit: +4%</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="bear-scenarios" class="tab-content">
+                <h3>📉 Bear Market Strategies</h3>
+                <div class="strategy-summary">
+                    <p><strong>Strategy:</strong> Capital preservation and selective short opportunities</p>
+                    <p><strong>Risk Level:</strong> Reduced (0.5-1% max per trade)</p>
+                    <p><strong>Focus:</strong> Risk control and drawdown management</p>
+                </div>
+                <div class="key-principles">
+                    <h4>Key Principles:</h4>
+                    <ul>
+                        <li>Capital preservation is more important than profits during downtrends</li>
+                        <li>Extreme volatility (&gt;5%) requires minimal position sizes (0.5%)</li>
+                        <li>Tight risk control with quick profit taking on any short positions</li>
+                        <li>Cash position preferred during high volatility periods</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="range-scenarios" class="tab-content">
+                <h3>🌊 Range-Bound Strategies</h3>
+                <div class="strategy-summary">
+                    <p><strong>Strategy:</strong> Mean reversion - buy support, sell resistance</p>
+                    <p><strong>Risk Level:</strong> Moderate (1-1.5% max per trade)</p>
+                    <p><strong>Range Width:</strong> Requires &gt;2% range for profitability</p>
+                </div>
+                <div class="key-principles">
+                    <h4>Key Principles:</h4>
+                    <ul>
+                        <li>Wide ranges (&gt;5%) offer better risk/reward ratios</li>
+                        <li>Buy near support levels, sell near resistance levels</li>
+                        <li>Quick scalping strategies for tight ranges (&lt;2%)</li>
+                        <li>Range trading requires patience and discipline</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="risk-management" class="tab-content">
+                <h3>🛡️ Risk Management</h3>
+                <div class="strategy-summary">
+                    <p><strong>Focus:</strong> Drawdown control and position sizing rules</p>
+                    <p><strong>Max Drawdown:</strong> 10% portfolio emergency stop</p>
+                    <p><strong>Daily Loss Limit:</strong> 5% maximum per day</p>
+                </div>
+                <div class="key-principles">
+                    <h4>Professional Risk Standards:</h4>
+                    <ul>
+                        <li>Maximum 2% risk per trade (never exceed)</li>
+                        <li>Total portfolio exposure: Maximum 20% in BTC</li>
+                        <li>Drawdown limits: &lt;5% normal, 5-10% reduce risk, &gt;10% emergency stop</li>
+                        <li>Stop losses always required - no exceptions</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="position-sizing" class="tab-content">
+                <h3>📊 Position Sizing</h3>
+                <div class="strategy-summary">
+                    <p><strong>Formula:</strong> Position Size = Risk Amount ÷ (Entry Price - Stop Loss)</p>
+                    <p><strong>Account Risk:</strong> 2% of total portfolio per trade</p>
+                    <p><strong>Leverage:</strong> Maximum 3x (experts prefer 1-3x)</p>
+                </div>
+                <div class="key-principles">
+                    <h4>Mathematical Approach:</h4>
+                    <ul>
+                        <li>Risk Amount = Account Balance × 2% (never exceed)</li>
+                        <li>Price Risk = Entry Price - Stop Loss Price</li>
+                        <li>Position Size = Risk Amount ÷ Price Risk</li>
+                        <li>Account for leverage restrictions and margin requirements</li>
+                    </ul>
+                </div>
+                <div class="example-calculation">
+                    <h4>Example: BTC @ $60,000, Stop @ $58,800</h4>
+                    <p>Account: $100,000 | Risk: $2,000 (2%) | Price Risk: $1,200</p>
+                    <p><strong>Position Size: $2,000 ÷ $1,200 = 1.67 BTC</strong></p>
+                </div>
+            </div>
+
+            <div id="performance" class="tab-content">
+                <h3>🏆 Performance Metrics</h3>
+                <div class="strategy-summary">
+                    <p><strong>Target:</strong> Risk-adjusted returns over absolute gains</p>
+                    <p><strong>Sharpe Ratio:</strong> Minimum 1.5 (Expert &gt;2.0)</p>
+                    <p><strong>Max Drawdown:</strong> Maximum 15% (Expert &lt;10%)</p>
+                </div>
+                <div class="performance-benchmarks">
+                    <h4>Professional Benchmarks:</h4>
+                    <div class="benchmark-grid">
+                        <div class="benchmark-item">
+                            <div class="benchmark-label">Sharpe Ratio</div>
+                            <div class="benchmark-value expert">&gt; 1.5</div>
+                        </div>
+                        <div class="benchmark-item">
+                            <div class="benchmark-label">Max Drawdown</div>
+                            <div class="benchmark-value expert">&lt; 15%</div>
+                        </div>
+                        <div class="benchmark-item">
+                            <div class="benchmark-label">Win Rate</div>
+                            <div class="benchmark-value expert">&gt; 45%</div>
+                        </div>
+                        <div class="benchmark-item">
+                            <div class="benchmark-label">Profit Factor</div>
+                            <div class="benchmark-value expert">&gt; 1.5</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="key-principles">
+                    <h4>Expert Principle:</h4>
+                    <p><em>A trader with 30% annual return and 10% max drawdown (Sharpe &gt; 2) is better than one with 200% return and 70% drawdown.</em></p>
+                </div>
+            </div>
+        </div>
 
         <div class="dashboard">
             <div class="card">
@@ -381,6 +723,35 @@ npm run agent-cli query market-hunter
 
         function viewDatabase() {
             alert('🗄️ Database Info:\n\nThe SQLite database contains:\n• Agent decision logs\n• Alpha discovery records\n• Strategic decision history\n• Performance metrics\n\nRun locally to query: npm run agent-cli status');
+        }
+
+        // Tab switching function for trading scenarios
+        function showTab(tabId) {
+            // Hide all tab contents
+            const allTabs = document.querySelectorAll('.tab-content');
+            allTabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Remove active class from all nav tabs
+            const allNavTabs = document.querySelectorAll('.nav-tab');
+            allNavTabs.forEach(navTab => {
+                navTab.classList.remove('active');
+            });
+
+            // Show selected tab content
+            const selectedTab = document.getElementById(tabId);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+            }
+
+            // Add active class to clicked nav tab
+            const clickedNavTab = event.target;
+            if (clickedNavTab) {
+                clickedNavTab.classList.add('active');
+            }
+
+            console.log(`✅ Switched to tab: ${tabId}`);
         }
 
         // Simulate live updates
