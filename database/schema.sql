@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS news_analysis (
 
 -- Initialize the single row for the portfolio's live state
 INSERT OR REPLACE INTO portfolio (id, btc_balance, usd_balance, last_updated) 
-VALUES (1, 0.0, 100000.0, CURRENT_TIMESTAMP);
+VALUES (1, 0.0, 10000.0, CURRENT_TIMESTAMP);
 
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_trades_timestamp ON trades(timestamp);

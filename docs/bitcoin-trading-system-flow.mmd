@@ -1,182 +1,81 @@
-graph TB
-    %% Application Entry Points & Initialization
-    Start([🚀 Application Start]) --> EnvLoad[⚙️ Load Environment Variables]
-    EnvLoad --> ServerInit[📡 Express Server Initialization]
-    ServerInit --> DatabaseInit[(🗄️ DatabaseService Connection)]
-    ServerInit --> AgentManagerInit[🤖 AgentManager Auto-Initialization]
-    ServerInit --> StaticServing[📁 Static File Serving]
-    ServerInit --> DashboardServe[🖥️ Dashboard Server Start]
-    
-    %% Agent Manager System
-    AgentManagerInit --> AgentSystemStart[⚡ Agent System Auto-Startup]
-    AgentSystemStart --> StrategicOrchestrator[🎯 Strategic Orchestrator Agent]
-    AgentSystemStart --> MarketHunter[📊 Market Hunter Agent] 
-    AgentSystemStart --> DataCollector[📈 Data Collector Agent]
-    AgentSystemStart --> ContentCreator[📝 Content Creator Agent]
-    
-    %% Live Agent Decision Cycles
-    AgentSystemStart --> TimingCycles[⏰ Automated Decision Cycles]
-    TimingCycles --> Cycle1min[🕐 1-min Quick Market Check]
-    TimingCycles --> Cycle5min[🕔 5-min Detailed Analysis]
-    TimingCycles --> Cycle15min[🕐 15-min Strategy Review]
-    TimingCycles --> Cycle1hr[🕐 1-hour Performance Review]
-    TimingCycles --> CycleDaily[🕐 Daily Strategic Planning]
-    TimingCycles --> InitialDecisions[🚀 Immediate Initial Decisions]
-    
-    %% Agent Decision Making Process
-    Cycle1min --> AgentDecisionEngine{🧠 Agent Decision Engine}
-    Cycle5min --> AgentDecisionEngine
-    Cycle15min --> AgentDecisionEngine
-    Cycle1hr --> AgentDecisionEngine
-    CycleDaily --> AgentDecisionEngine
-    InitialDecisions --> AgentDecisionEngine
-    
-    %% Real-time Data Integration
-    ExternalAPIs[🌐 External APIs] --> CoinGeckoAPI[💰 CoinGecko Price API]
-    ExternalAPIs --> NewsAPI[📰 NewsAPI Feed]
-    CoinGeckoAPI --> MarketDataFlow[📊 Live Market Data]
-    NewsAPI --> NewsDataFlow[📰 News Feed Data]
-    
-    MarketDataFlow --> AgentDecisionEngine
-    NewsDataFlow --> AgentDecisionEngine
-    
-    %% Decision Processing
-    AgentDecisionEngine --> DecisionGeneration[⚡ Generate Decision]
-    DecisionGeneration --> ConfidenceCalc["📊 Calculate Confidence Score 70-100%"]
-    ConfidenceCalc --> ReasoningGen[🧾 Generate Reasoning]
-    ReasoningGen --> ExecutionCheck{"✅ Should Execute? 80% Rate"}
-    
-    ExecutionCheck -->|Yes| ExecuteDecision[⚡ Execute Decision]
-    ExecutionCheck -->|No| SkipDecision[⏭️ Skip Decision]
-    
-    %% Live Decision Logging & Statistics
-    ExecuteDecision --> LogDecision[📝 Log Decision to Array]
-    SkipDecision --> LogDecision
-    LogDecision --> UpdateAgentStats[📊 Update Agent Statistics]
-    LogDecision --> DecisionBuffer[💾 Decision History Buffer]
-    UpdateAgentStats --> AgentPerformance[📈 Agent Performance Tracking]
-    UpdateAgentStats --> DatabaseLog[(🗄️ Database Logging)]
-    
-    %% Complete API Endpoint System
-    DashboardServe --> DashboardAPI[🔌 Complete API Endpoints]
-    DashboardAPI --> BitcoinPriceAPI["/api/bitcoin-price"]
-    DashboardAPI --> BitcoinNewsAPI["/api/bitcoin-news"]
-    DashboardAPI --> MarketAnalysisAPI["/api/market-analysis"]
-    DashboardAPI --> AgentStatusAPI["/api/agent-status"]
-    DashboardAPI --> AgentDecisionsAPI["/api/agent-decisions"]
-    DashboardAPI --> AgentLogsAPI["/api/agent-logs"]
-    DashboardAPI --> PerformanceAPI["/api/performance"]
-    DashboardAPI --> PortfolioAPI["/api/portfolio"]
-    DashboardAPI --> ExecutionProgressAPI["/api/execution-progress"]
-    DashboardAPI --> GenerateContentAPI["/api/generate-content"]
-    DashboardAPI --> TradeHistoryAPI["/api/trade-history"]
-    DashboardAPI --> HealthAPI["/api/health"]
-    
-    %% Live Agent Data Flow
-    AgentPerformance --> AgentStatusAPI
-    DecisionBuffer --> AgentDecisionsAPI
-    DatabaseLog --> AgentLogsAPI
-    
-    %% Dashboard Auto-Refresh System
-    DashboardServe --> AutoRefresh[🔄 Auto-refresh every 60s]
-    AutoRefresh --> RefreshAgentStatus[📊 Refresh Agent Status]
-    AutoRefresh --> RefreshDecisions[💭 Refresh Recent Decisions]
-    AutoRefresh --> RefreshLogs[📋 Refresh Execution Logs]
-    AutoRefresh --> RefreshPortfolio[💰 Refresh Portfolio Data]
-    
-    RefreshAgentStatus --> AgentStatusAPI
-    RefreshDecisions --> AgentDecisionsAPI
-    RefreshLogs --> AgentLogsAPI
-    RefreshPortfolio --> PortfolioAPI
-    
-    %% Agent Goal-Based Actions
-    ExecuteDecision --> ActionRouter{🎯 Action Type Router}
-    ActionRouter -->|quick_market_check| QuickAction[⚡ Quick Market Signal]
-    ActionRouter -->|detailed_analysis| AnalysisAction[🔍 Technical Analysis]
-    ActionRouter -->|strategy_review| StrategyAction[📋 Strategy Adjustment]
-    ActionRouter -->|performance_review| PerformanceAction[📊 Performance Assessment]
-    ActionRouter -->|strategic_planning| PlanningAction[🎯 Strategic Planning]
-    ActionRouter -->|content_planning| ContentAction[📝 Content Creation]
-    
-    %% Trading Scenario Integration
-    QuickAction --> ScenarioMatcher{🎯 Match Trading Scenario}
-    AnalysisAction --> ScenarioMatcher
-    StrategyAction --> ScenarioMatcher
-    ScenarioMatcher -->|Bull Market| BullScenario[📈 Bull Market Strategy]
-    ScenarioMatcher -->|Bear Market| BearScenario[📉 Bear Market Strategy]
-    ScenarioMatcher -->|Range-Bound| RangeScenario[🌊 Range-Bound Strategy]
-    ScenarioMatcher -->|Volatile| VolatileScenario[⚡ High Volatility Strategy]
-    ScenarioMatcher -->|Breakout| BreakoutScenario[🚀 Breakout Strategy]
-    ScenarioMatcher -->|Recovery| RecoveryScenario[🔄 Recovery Strategy]
-    
-    %% Strategy Execution
-    BullScenario --> StrategyExecution[⚡ Execute Trading Strategy]
-    BearScenario --> StrategyExecution
-    RangeScenario --> StrategyExecution
-    VolatileScenario --> StrategyExecution
-    BreakoutScenario --> StrategyExecution
-    RecoveryScenario --> StrategyExecution
-    
-    StrategyExecution --> RiskMgmt[🛡️ Apply Risk Rules]
-    RiskMgmt --> PositionSize[📊 Calculate Position]
-    PositionSize --> TradeExecution[💫 Execute Trade]
-    
-    %% Portfolio Management
-    TradeExecution --> PortfolioUpdate[📊 Update Portfolio]
-    PortfolioUpdate --> PerformanceCalc[📈 Calculate Performance]
-    PerformanceCalc --> GoalProgress[🎯 Assess Goal Progress]
-    GoalProgress --> FeedbackLoop[🔄 Agent Learning Feedback]
-    FeedbackLoop --> AgentDecisionEngine
-    
-    %% Live Status Broadcasting
-    AgentPerformance --> LiveStatus[📡 Live Agent Status]
-    LiveStatus --> DashboardBroadcast[📺 Dashboard Real-time Updates]
-    PerformanceCalc --> LivePerformance[📊 Live Performance Metrics]
-    LivePerformance --> DashboardBroadcast
-    
-    %% Agent Decision History & Optimization
-    DecisionBuffer --> DecisionHistory[📚 Decision History Analysis]
-    DecisionHistory --> TrendAnalysis[📈 Decision Trend Analysis]
-    TrendAnalysis --> AgentOptimization[🔧 Agent Performance Optimization]
-    AgentOptimization --> FeedbackLoop
-    
-    %% 6-Tab Dashboard Integration
-    DashboardBroadcast --> Tab1[📊 Portfolio Overview]
-    DashboardBroadcast --> Tab2[📈 Trading Scenarios] 
-    DashboardBroadcast --> Tab3[🤖 Agent Status]
-    DashboardBroadcast --> Tab4[📋 Execution Logs]
-    DashboardBroadcast --> Tab5[📊 Performance Metrics]
-    DashboardBroadcast --> Tab6[🎯 Strategic Overview]
-    
-    %% Static File Serving & Additional Routes
-    StaticServing --> PublicFiles[📁 /public Static Files]
-    StaticServing --> DocsFiles[📁 /docs Documentation]
-    StaticServing --> ScenarioRoutes[🎯 Trading Scenario Routes]
-    StaticServing --> DebugRoutes[🔧 Debug & Test Routes]
-    
-    %% Server Health & Monitoring
-    DashboardAPI --> ServerHealth[💚 Server Health Monitoring]
-    ServerHealth --> HealthAPI
-    DatabaseInit --> DBHealth[🗄️ Database Health Check]
-    DBHealth --> ServerHealth
+graph TD
+    subgraph 🧠 True Agentic Orchestrator Process
+        direction LR
+        OrchestratorStart([🚀 Start true-agentic-orchestrator.js]) --> OrchestratorInit[⚙️ Initialize Orchestrator]
+        OrchestratorInit --> AgentCreation[🤖 Create Agentic Agents]
+        OrchestratorInit --> DBConnect1[(�️)]
+        
+        OrchestratorInit --> StrategicCycles{⏰ Strategic Orchestration Cycles}
+        StrategicCycles --> AssessState[� Assess System State]
+        AssessState --> ExternalAPIs[🌐 Fetch External Data]
+        ExternalAPIs --> CoinGecko[� CoinGecko Price]
+        
+        AssessState --> MakeDecisions[🧠 Make Strategic Decisions]
+        MakeDecisions --> ExpertMethodology[🏆 Use BTC Expert Methodology]
+        MakeDecisions --> LogToDB[📝 Write to Database]
+        
+        LogToDB --> DB_Portfolio_Write([fa:fa-edit Portfolio])
+        LogToDB --> DB_Trades_Write([fa:fa-edit Trades])
+        LogTogether with a descriptive commit message.
+        LogToDB --> DB_History_Write([fa:fa-edit History])
+        LogToDB --> DB_Logs_Write([fa:fa-edit Agent Logs])
+    end
 
-    %% Color coding for clarity
-    classDef entryPoint fill:#2ecc71,stroke:#27ae60,stroke-width:3px,color:#fff
-    classDef agentCore fill:#e74c3c,stroke:#c0392b,stroke-width:3px,color:#fff  
-    classDef decision fill:#f39c12,stroke:#e67e22,stroke-width:2px,color:#fff
-    classDef execution fill:#9b59b6,stroke:#8e44ad,stroke-width:2px,color:#fff
-    classDef timing fill:#3498db,stroke:#2980b9,stroke-width:2px,color:#fff
-    classDef data fill:#95a5a6,stroke:#7f8c8d,stroke-width:2px,color:#fff
-    classDef api fill:#1abc9c,stroke:#16a085,stroke-width:2px,color:#fff
-    classDef dashboard fill:#34495e,stroke:#2c3e50,stroke-width:2px,color:#fff
-    classDef external fill:#e67e22,stroke:#d35400,stroke-width:2px,color:#fff
+    subgraph 🌐 Web Server & API Process
+        direction LR
+        ServerStart([� Start real-time-server.js]) --> ExpressInit[� Initialize Express Server]
+        ExpressInit --> StaticServing[📁 Serve Static Dashboard]
+        ExpressInit --> APIEndpoints[🔌 Define API Endpoints]
+        ExpressInit --> DBConnect2[(🗄️)]
+
+        APIEndpoints --> API_Portfolio["/api/portfolio"]
+        APIEndpoints --> API_Performance["/api/performance"]
+        APIEndpoints --> API_AgentStatus["/api/agent-status"]
+        APIEndpoints --> API_TradeHistory["/api/trade-history"]
+        
+        API_Portfolio --> DB_Portfolio_Read([fa:fa-book-open Portfolio])
+        API_Performance --> DB_History_Read([fa:fa-book-open History])
+        API_AgentStatus --> DB_Logs_Read([fa:fa-book-open Agent Logs])
+        API_TradeHistory --> DB_Trades_Read([fa:fa-book-open Trades])
+    end
+
+    subgraph �️ Central Database [Single Source of Truth]
+        direction TB
+        style CentralDatabase fill:#f0f4f8,stroke:#b0c4de
+        Database[(trading.db)]
+    end
     
-    class Start,EnvLoad,ServerInit,AgentManagerInit entryPoint
-    class AgentSystemStart,StrategicOrchestrator,MarketHunter,DataCollector,ContentCreator agentCore
-    class AgentDecisionEngine,DecisionGeneration,ExecutionCheck,ActionRouter,ScenarioMatcher decision
-    class ExecuteDecision,TradeExecution,StrategyExecution execution
-    class TimingCycles,Cycle1min,Cycle5min,Cycle15min,Cycle1hr,CycleDaily timing
-    class MarketDataFlow,NewsDataFlow,DatabaseLog,DecisionHistory,DecisionBuffer data
-    class DashboardAPI,AgentStatusAPI,AgentDecisionsAPI,AgentLogsAPI,BitcoinPriceAPI,BitcoinNewsAPI api
-    class DashboardServe,DashboardBroadcast,Tab1,Tab2,Tab3,Tab4,Tab5,Tab6 dashboard
-    class ExternalAPIs,CoinGeckoAPI,NewsAPI external
+    subgraph �️ User Dashboard
+        direction TB
+        User([� User]) --> Dashboard[📊 View Dashboard]
+        Dashboard --> Call_API_Portfolio["Request Portfolio"]
+        Dashboard --> Call_API_Performance["Request Performance"]
+        Dashboard --> Call_API_AgentStatus["Request Agent Status"]
+    end
+
+    %% Connections
+    DBConnect1 --> Database
+    DBConnect2 --> Database
+    
+    LogToDB -- writes to --> Database
+    
+    DB_Portfolio_Read --> API_Portfolio
+    DB_History_Read --> API_Performance
+    DB_Logs_Read --> API_AgentStatus
+    DB_Trades_Read --> API_TradeHistory
+
+    Call_API_Portfolio --> API_Portfolio
+    Call_API_Performance --> API_Performance
+    Call_API_AgentStatus --> API_AgentStatus
+
+    %% Styling
+    classDef process fill:#e6f0ff,stroke:#99c2ff,stroke-width:2px
+    classDef database fill:#fff0e6,stroke:#ffc299,stroke-width:2px
+    classDef user fill:#e6ffe6,stroke:#99ff99,stroke-width:2px
+    classDef entry fill:#d1e0e0,stroke:#85adad,stroke-width:2px,font-weight:bold
+
+    class OrchestratorStart,ServerStart entry
+    class "🧠 True Agentic Orchestrator Process" process
+    class "🌐 Web Server & API Process" process
+    class "🗄️ Central Database [Single Source of Truth]" database
+    class "🖥️ User Dashboard" user

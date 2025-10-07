@@ -32,6 +32,16 @@ class DatabaseService {
                 await this.runQuery(schema);
                 console.log('✅ Database initialized with schema');
             }
+
+            // Ensure the single portfolio row exists
+            const portfolio = await this.runQuery('SELECT * FROM portfolio WHERE id = 1');
+            if (portfolio.length === 0) {
+                await this.runQuery(
+                    "INSERT INTO portfolio (id, btc_balance, usd_balance, last_updated) VALUES (1, 0, 10000, datetime('now'))"
+                );
+                console.log('💰 Initial portfolio created with $10,000 USD.');
+            }
+
         } catch (error) {
             console.error('❌ Database initialization error:', error);
         }
@@ -44,7 +54,8 @@ class DatabaseService {
                 return;
             }
 
-            if (query.includes('SELECT') || query.includes('SELECT')) {
+            // Use db.all for SELECT, db.run for others.
+            if (query.trim().toUpperCase().startsWith('SELECT')) {
                 this.db.all(query, params, (err, rows) => {
                     if (err) reject(err);
                     else resolve(rows);
@@ -58,26 +69,65 @@ class DatabaseService {
         });
     }
 
-    // Portfolio Operations
-    async getCurrentPortfolio() {
-        const query = `
-            SELECT * FROM portfolio 
-            ORDER BY timestamp DESC 
-            LIMIT 1
-        `;
-        const result = await this.runQuery(query);
-        return result[0] || null;
-    }
+    // --- V3 Portfolio Operations ---
 
-    async updatePortfolio(btcHoldings, usdBalance, totalValue, profit = 0, profitPercentage = 0) {
+    /**
+     * Gets the single, live portfolio row.
+     */
+    async getLivePortfolio() {
+        const query = `SELECT * FROM portfolio WHERE id = 1`;
+        const result = await this.runQuery(query);
+        // Add total_value_usd for consistency with old structure, calculated on the fly
+        if (result[0]) {
+            const portfolio = result[0];
+            const btcPrice = await this.getCurrentBitcoinPrice();
+            portfolio.total_value_usd = portfolio.usd_balance + (portfolio.btc_balance * btcPrice);
+            return portfolio;
+        }
+        return null;
+    }
+    
+    /**
+     * Updates the live portfolio state. This should be part of a transaction in a real scenario.
+     */
+    async updateLivePortfolio(btcBalance, usdBalance) {
         const query = `
             UPDATE portfolio 
-            SET btc_holdings = ?, usd_balance = ?, total_value_usd = ?, 
-                total_profit_usd = ?, profit_percentage = ?, last_updated = CURRENT_TIMESTAMP
+            SET btc_balance = ?, usd_balance = ?, last_updated = datetime('now')
             WHERE id = 1
         `;
-        return await this.runQuery(query, [btcHoldings, usdBalance, totalValue, profit, profitPercentage]);
+        return await this.runQuery(query, [btcBalance, usdBalance]);
     }
+
+    /**
+     * Records a snapshot of the current portfolio state into the history table.
+     */
+    async recordPortfolioSnapshot() {
+        const livePortfolio = await this.getLivePortfolio();
+        if (!livePortfolio) return;
+
+        const btcPrice = await this.getCurrentBitcoinPrice();
+        const totalValue = livePortfolio.usd_balance + (livePortfolio.btc_balance * btcPrice);
+
+        const query = `
+            INSERT INTO portfolio_history (btc_balance, usd_balance, btc_price_usd, total_value_usd)
+            VALUES (?, ?, ?, ?)
+        `;
+        return await this.runQuery(query, [livePortfolio.btc_balance, livePortfolio.usd_balance, btcPrice, totalValue]);
+    }
+    
+    /**
+     * Retrieves the portfolio history for charts and analysis.
+     */
+    async getPortfolioHistory(limit = 100) {
+        const query = `
+            SELECT * FROM portfolio_history
+            ORDER BY timestamp DESC
+            LIMIT ?
+        `;
+        return await this.runQuery(query, [limit]);
+    }
+
 
     // Trade Operations
     async recordTrade(type, amountBtc, priceUsd, feeUsd, totalUsd, reason, marketConditions) {
@@ -86,7 +136,35 @@ class DatabaseService {
                               agent_decision_reason, market_conditions)
             VALUES (?, ?, ?, ?, ?, ?, ?)
         `;
-        return await this.runQuery(query, [type, amountBtc, priceUsd, feeUsd, totalUsd, reason, marketConditions]);
+        // Transaction: Update portfolio and record trade together
+        return new Promise((resolve, reject) => {
+            this.db.serialize(async () => {
+                try {
+                    this.db.run('BEGIN TRANSACTION');
+                    
+                    const portfolio = await this.getLivePortfolio();
+                    let { btc_balance, usd_balance } = portfolio;
+
+                    if (type === 'BUY') {
+                        btc_balance += amountBtc;
+                        usd_balance -= totalUsd;
+                    } else { // SELL
+                        btc_balance -= amountBtc;
+                        usd_balance += totalUsd;
+                    }
+
+                    await this.runQuery(query, [type, amountBtc, priceUsd, feeUsd, totalUsd, reason, marketConditions]);
+                    await this.updateLivePortfolio(btc_balance, usd_balance);
+
+                    this.db.run('COMMIT');
+                    resolve({ success: true });
+                } catch (error) {
+                    this.db.run('ROLLBACK');
+                    console.error("Trade recording failed, transaction rolled back.", error);
+                    reject(error);
+                }
+            });
+        });
     }
 
     async getRecentTrades(limit = 10) {
@@ -287,46 +365,38 @@ class DatabaseService {
         return results;
     }
 
-    // Calculate detailed performance metrics - FIXED VERSION
+    // Calculate detailed performance metrics - V3 FIXED VERSION
     async getDetailedPerformance() {
         try {
             const basicStats = await this.getPortfolioPerformance();
-            const portfolio = await this.getCurrentPortfolio();
+            const portfolio = await this.getLivePortfolio();
             
-            // FIXED: Calculate success rate from properly paired trades
             const successRate = basicStats.profitableTrades?.count && basicStats.totalSellTrades?.count 
                 ? (basicStats.profitableTrades.count / basicStats.totalSellTrades.count * 100)
                 : 0;
 
-            // FIXED: Use proper average return from paired trades
             const avgReturn = basicStats.avgReturn?.avg_return || 0;
-
-            // FIXED: Calculate proper Sharpe ratio with actual volatility
             const sharpeRatio = await this.calculateSharpeRatio();
 
-            // Calculate total return percentage
-            const initialInvestment = 10000; // Starting with $10k as specified
+            const initialInvestment = 10000; // Starting with $10k
             const currentValue = portfolio?.total_value_usd || initialInvestment;
             const totalReturn = ((currentValue - initialInvestment) / initialInvestment * 100);
 
-            // FIXED: Calculate unrealized P&L
             const costBasis = basicStats.costBasis?.cost_basis || 0;
-            const currentBtcHoldings = portfolio?.btc_holdings || 0;
+            const currentBtcHoldings = portfolio?.btc_balance || 0;
             const currentPrice = await this.getCurrentBitcoinPrice();
             const unrealizedProfit = currentBtcHoldings * (currentPrice - costBasis);
             
-            // FIXED: Total profit = realized + unrealized
             const realizedProfit = basicStats.realizedProfit?.profit || 0;
             const totalProfit = realizedProfit + unrealizedProfit;
 
-            // FIXED: Calculate maximum drawdown
             const maxDrawdown = await this.calculateMaxDrawdown();
 
             return {
-                successRate: Math.round(successRate * 10) / 10, // Round to 1 decimal
+                successRate: Math.round(successRate * 10) / 10,
                 totalTrades: basicStats.totalTrades?.count || 0,
-                avgReturn: Math.round(avgReturn * 100) / 100, // Round to 2 decimals
-                sharpeRatio: Math.round(sharpeRatio * 100) / 100, // Round to 2 decimals
+                avgReturn: Math.round(avgReturn * 100) / 100,
+                sharpeRatio: Math.round(sharpeRatio * 100) / 100,
                 totalReturn: Math.round(totalReturn * 100) / 100,
                 realizedProfit: Math.round(realizedProfit * 100) / 100,
                 unrealizedProfit: Math.round(unrealizedProfit * 100) / 100,
@@ -336,25 +406,16 @@ class DatabaseService {
                 totalFees: basicStats.totalFees?.fees || 0,
                 costBasis: Math.round(costBasis * 100) / 100,
                 maxDrawdown: Math.round(maxDrawdown * 10) / 10,
-                winRate: basicStats.winRate?.win_rate || 0
+                winRate: basicStats.winRate?.win_rate || 0,
+                history: await this.getPortfolioHistory(200) // Add history for charts
             };
         } catch (error) {
             console.error('Error calculating detailed performance:', error);
             return {
-                successRate: 0,
-                totalTrades: 0,
-                avgReturn: 0,
-                sharpeRatio: 0,
-                totalReturn: 0,
-                realizedProfit: 0,
-                unrealizedProfit: 0,
-                totalProfit: 0,
-                totalVolume: 0,
-                dailyVolume: 0,
-                totalFees: 0,
-                costBasis: 0,
-                maxDrawdown: 0,
-                winRate: 0
+                successRate: 0, totalTrades: 0, avgReturn: 0, sharpeRatio: 0,
+                totalReturn: 0, realizedProfit: 0, unrealizedProfit: 0,
+                totalProfit: 0, totalVolume: 0, dailyVolume: 0, totalFees: 0,
+                costBasis: 0, maxDrawdown: 0, winRate: 0, history: []
             };
         }
     }
@@ -427,7 +488,7 @@ class DatabaseService {
         }
     }
 
-    // ADDED: Calculate maximum drawdown
+    // V3 FIXED: Calculate maximum drawdown from portfolio_history
     async calculateMaxDrawdown() {
         try {
             const query = `
@@ -437,7 +498,7 @@ class DatabaseService {
                     SELECT 
                         total_value_usd,
                         MAX(total_value_usd) OVER (ORDER BY timestamp ROWS UNBOUNDED PRECEDING) as peak_value
-                    FROM portfolio
+                    FROM portfolio_history
                     WHERE total_value_usd > 0
                 ) subquery
                 WHERE peak_value > 0
@@ -467,11 +528,15 @@ class DatabaseService {
             // Fallback to external API if no recent data
             const axios = await import('axios');
             const response = await axios.default.get('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+            if (!response.data.bitcoin.usd) {
+                throw new Error('Invalid price data from CoinGecko API');
+            }
             return response.data.bitcoin.usd;
             
         } catch (error) {
-            console.error('Error getting current Bitcoin price:', error);
-            return 60000; // Fallback price
+            const errorMessage = `CRITICAL: Could not fetch real-time Bitcoin price. ${error.message}`;
+            console.error(`❌ ${errorMessage}`);
+            throw new Error(errorMessage); // Fail fast
         }
     }
 

@@ -163,8 +163,15 @@ class TrueAgenticSystemOrchestrator {
   async assessSystemWideState() {
     console.log('   📊 Assessing system-wide state...');
     
-    // Get portfolio state
-    const portfolio = await this.db.getCurrentPortfolio();
+    // Get portfolio state using the correct V3 function
+    const portfolio = await this.db.getLivePortfolio();
+
+    // CRITICAL: If portfolio is not available, we cannot assess the state.
+    if (!portfolio) {
+        const errorMessage = 'CRITICAL: Could not retrieve portfolio state for system assessment.';
+        console.error(`❌ ${errorMessage}`);
+        throw new Error(errorMessage);
+    }
     
     // Assess agent states
     const agentStates = [];
@@ -180,7 +187,7 @@ class TrueAgenticSystemOrchestrator {
     
     return {
       timestamp: new Date(),
-      portfolioValue: portfolio.totalValue,
+      portfolioValue: portfolio.total_value_usd, // Corrected property name
       agentCount: this.agents.size,
       systemEfficiency,
       strategicAlignment,
@@ -259,11 +266,19 @@ class TrueAgenticSystemOrchestrator {
       };
       
       // Get portfolio state for expert analysis
-      const portfolio = await this.db.getCurrentPortfolio();
+      const portfolio = await this.db.getLivePortfolio();
+
+      // CRITICAL: If portfolio is not available, we cannot make a decision.
+      if (!portfolio) {
+        const errorMessage = 'CRITICAL: Could not retrieve portfolio state. Skipping strategic cycle.';
+        console.error(`❌ ${errorMessage}`);
+        throw new Error(errorMessage);
+      }
+
       const portfolioState = {
-        totalValue: portfolio?.total_value_usd || 100000,
-        btcHoldings: portfolio?.btc_holdings || 0,
-        cashHoldings: portfolio?.cash_usd || 100000
+        totalValue: portfolio.total_value_usd,
+        btcHoldings: portfolio.btc_balance,
+        cashHoldings: portfolio.usd_balance
       };
       
       // Generate expert trading decision
@@ -874,10 +889,14 @@ class TrueAgenticSystemOrchestrator {
   async getCurrentBitcoinPrice() {
     try {
       const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+      if (!response.data.bitcoin.usd) {
+        throw new Error('Invalid price data from CoinGecko API');
+      }
       return response.data.bitcoin.usd;
     } catch (error) {
-      console.error('Error fetching Bitcoin price:', error);
-      return 60000; // Fallback price
+      const errorMessage = `CRITICAL: Could not fetch real-time Bitcoin price. ${error.message}`;
+      console.error(`❌ ${errorMessage}`);
+      throw new Error(errorMessage); // Fail fast
     }
   }
 
