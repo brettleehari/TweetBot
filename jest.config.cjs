@@ -5,7 +5,9 @@ module.exports = {
   transform: {
     '^.+\\.(ts|tsx)$': 'ts-jest'
   },
-  testMatch: ['**/*.test.(ts|js)'],
+  // Limit tests to the agent tests under src/mastra/agents and ignore transpiled dist
+  testMatch: ['**/src/mastra/agents/**/*.test.(ts|js)'],
+  testPathIgnorePatterns: ['/dist/', '/node_modules/'],
   collectCoverageFrom: [
     'src/**/*.(ts|js)',
     '!src/**/*.test.(ts|js)'

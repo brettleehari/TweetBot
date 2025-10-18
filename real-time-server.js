@@ -503,6 +503,50 @@ app.get('/api/trade-history', async (req, res) => {
   }
 });
 
+// --- PHASE 1: System Control & Monitoring APIs ---
+
+// Endpoint to get the current system status
+app.get('/api/system/status', async (req, res) => {
+    try {
+        const status = await db.getSystemConfig('system_status', 'unknown');
+        const lastUpdated = await db.getSystemConfig('system_status_last_updated', new Date().toISOString());
+        res.json({ success: true, data: { status, lastUpdated } });
+    } catch (error) {
+        console.error('Error fetching system status:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch system status' });
+    }
+});
+
+// Endpoint to send a system command
+app.post('/api/system/command', async (req, res) => {
+    const { command, parameters } = req.body;
+    if (!command) {
+        return res.status(400).json({ success: false, error: 'Command not provided' });
+    }
+
+    try {
+        await db.createSystemCommand(command, parameters);
+        console.log(`[API] Received command: ${command}`);
+        res.json({ success: true, message: `Command '${command}' queued for processing.` });
+    } catch (error) {
+        console.error(`Error creating system command '${command}':`, error);
+        res.status(500).json({ success: false, error: 'Failed to queue system command' });
+    }
+});
+
+// Endpoint to get recent system alerts
+app.get('/api/system/alerts', async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 15;
+        const alerts = await db.getRecentAlerts(limit);
+        res.json({ success: true, data: alerts });
+    } catch (error) {
+        console.error('Error fetching system alerts:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch system alerts' });
+    }
+});
+
+
 // Health Check API
 app.get('/api/health', (req, res) => {
   res.json({ 

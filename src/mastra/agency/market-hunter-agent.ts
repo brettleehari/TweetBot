@@ -1,5 +1,6 @@
 import { AgenticAgent, AgentState, GoalEvaluation, EnvironmentAnalysis, AgentDecision, ExecutionResult, CompetitiveAnalysis, Opportunity, ThreatAssessment, ResourceAssessment } from './agentic-agent.js';
 import { PerformanceMetrics } from './core-agency.js';
+import { MarketDataSourceManager } from '../services/market-data-sources.js';
 
 // Market Hunter Agent: Proactive Intelligence with true agency
 export class MarketHunterAgent extends AgenticAgent {
@@ -9,6 +10,7 @@ export class MarketHunterAgent extends AgenticAgent {
   private competitorTracker: CompetitorTracker;
   private currentThreshold: number = 0.7;
   private huntingGrounds: HuntingGrounds;
+  private dataSourceManager: MarketDataSourceManager;
 
   constructor() {
     super(
@@ -31,6 +33,7 @@ export class MarketHunterAgent extends AgenticAgent {
     this.huntingStrategy = new HuntingStrategy();
     this.competitorTracker = new CompetitorTracker();
     this.huntingGrounds = new HuntingGrounds();
+    this.dataSourceManager = new MarketDataSourceManager();
   }
 
   // CORE AGENCY: Autonomous hunting cycle
@@ -51,7 +54,9 @@ export class MarketHunterAgent extends AgenticAgent {
         this.huntArbitrageOpportunities(selectedGrounds.markets),
         this.huntInfluencerSignals(selectedGrounds.personalities),
         this.huntTechnicalBreakouts(selectedGrounds.technical),
-        this.huntInstitutionalFlow(selectedGrounds.institutional)
+        this.huntInstitutionalFlow(selectedGrounds.institutional),
+        this.huntDerivativesSignals(selectedGrounds.derivatives),
+        this.huntMacroSignals(selectedGrounds.macro)
       ]);
 
       // 4. Flatten and filter discoveries
@@ -92,7 +97,9 @@ export class MarketHunterAgent extends AgenticAgent {
       markets: this.shouldHuntMarkets(groundsEffectiveness, marketConditions),
       personalities: this.shouldHuntPersonalities(groundsEffectiveness, marketConditions),
       technical: this.shouldHuntTechnical(groundsEffectiveness, marketConditions),
-      institutional: this.shouldHuntInstitutional(groundsEffectiveness, marketConditions)
+      institutional: this.shouldHuntInstitutional(groundsEffectiveness, marketConditions),
+      derivatives: this.shouldHuntDerivatives(groundsEffectiveness, marketConditions),
+      macro: this.shouldHuntMacro(groundsEffectiveness, marketConditions)
     };
   }
 
@@ -317,6 +324,80 @@ export class MarketHunterAgent extends AgenticAgent {
     }
   }
 
+  // AGENCY: Derivatives signal hunting
+  private async huntDerivativesSignals(enabled: boolean): Promise<AlphaDiscovery[]> {
+    if (!enabled) return [];
+    
+    console.log('📈 Hunting derivatives signals...');
+    
+    try {
+      const derivativesSignals = await this.detectDerivativesSignals();
+      const discoveries: AlphaDiscovery[] = [];
+      
+      for (const signal of derivativesSignals) {
+        const alphaValue = await this.calculateDerivativesAlphaValue(signal);
+        
+        if (alphaValue > this.currentThreshold) {
+          discoveries.push({
+            type: 'derivatives_signal',
+            description: `Derivatives signal for ${signal.asset}: Funding rate at ${(signal.fundingRate * 100).toFixed(4)}%`,
+            alphaValue,
+            confidence: signal.confidence,
+            urgency: 'medium',
+            source: 'derivatives_analysis',
+            discoveryTime: new Date(),
+            expirationTime: new Date(Date.now() + 8 * 60 * 60 * 1000), // 8 hours
+            actionableInsight: `Funding rate anomaly suggests potential price movement.`,
+            supportingData: signal
+          });
+        }
+      }
+      
+      return discoveries;
+      
+    } catch (error) {
+      console.error('❌ Derivatives hunting failed:', error);
+      return [];
+    }
+  }
+
+  // AGENCY: Macroeconomic signal hunting
+  private async huntMacroSignals(enabled: boolean): Promise<AlphaDiscovery[]> {
+    if (!enabled) return [];
+    
+    console.log('🌍 Hunting macroeconomic signals...');
+    
+    try {
+      const macroSignals = await this.detectMacroSignals();
+      const discoveries: AlphaDiscovery[] = [];
+      
+      for (const signal of macroSignals) {
+        const alphaValue = await this.calculateMacroAlphaValue(signal);
+        
+        if (alphaValue > this.currentThreshold) {
+          discoveries.push({
+            type: 'macro_signal',
+            description: `Macro signal: ${signal.indicator} at ${signal.value}`,
+            alphaValue,
+            confidence: signal.confidence,
+            urgency: 'low',
+            source: 'macro_analysis',
+            discoveryTime: new Date(),
+            expirationTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+            actionableInsight: `Macro indicator ${signal.indicator} suggests a shift in market sentiment.`,
+            supportingData: signal
+          });
+        }
+      }
+      
+      return discoveries;
+      
+    } catch (error) {
+      console.error('❌ Macro hunting failed:', error);
+      return [];
+    }
+  }
+
   // AGENCY: Competitive analysis and adaptation
   async competitiveAnalysis(): Promise<CompetitivePosition> {
     console.log('🏁 COMPETITIVE ANALYSIS: Benchmarking against other alpha sources...');
@@ -501,115 +582,105 @@ export class MarketHunterAgent extends AgenticAgent {
 
   // Helper methods for hunting implementation
   private async detectWhaleMovements(): Promise<WhaleMovement[]> {
-    // Simulated whale detection - would integrate with real blockchain data
-    return [
-      {
-        asset: 'BTC',
-        amount: 1000,
-        from: 'unknown_wallet_1',
-        to: 'exchange_wallet',
-        confidence: 0.85,
-        historicalPattern: 'accumulation_phase',
-        marketImpact: 0.7
-      },
-      {
-        asset: 'ETH',
-        amount: 5000,
-        from: 'whale_wallet_known',
-        to: 'defi_protocol',
-        confidence: 0.92,
-        historicalPattern: 'yield_farming',
-        marketImpact: 0.4
-      }
-    ];
+    // Real blockchain data from Blockchain.info API
+    const onChainSource = (this.dataSourceManager as any).onChain;
+    return await onChainSource.detectWhaleMovements();
   }
 
   private async detectNarrativeShifts(): Promise<NarrativeSignal[]> {
-    // Simulated narrative detection - would integrate with social media analysis
-    return [
-      {
-        theme: 'Bitcoin ETF institutional adoption',
-        strength: 0.8,
-        velocity: 0.9,
-        sources: ['twitter', 'reddit', 'news'],
-        keyInfluencers: ['analyst1', 'fund_manager2'],
-        sentiment: 'bullish',
-        novelty: 0.6
-      },
-      {
-        theme: 'DeFi yield opportunities emerging',
-        strength: 0.7,
-        velocity: 0.6,
-        sources: ['discord', 'telegram', 'defi_forums'],
-        keyInfluencers: ['defi_user1', 'protocol_founder'],
-        sentiment: 'optimistic',
-        novelty: 0.8
-      }
-    ];
+    // Real social sentiment data from CryptoPanic API
+    const socialSource = (this.dataSourceManager as any).social;
+    return await socialSource.detectNarrativeShifts();
   }
 
   private async detectArbitrageOpportunities(): Promise<ArbitrageOpportunity[]> {
-    // Simulated arbitrage detection - would use real exchange data
-    return [
-      {
-        asset: 'BTC',
-        exchanges: ['Binance', 'Coinbase'],
-        spread: 0.008, // 0.8%
-        liquidityScore: 0.9,
-        executionFeasibility: 0.85
-      },
-      {
-        asset: 'ETH',
-        exchanges: ['Kraken', 'FTX'],
-        spread: 0.012, // 1.2%
-        liquidityScore: 0.7,
-        executionFeasibility: 0.75
-      }
-    ];
+    // Real arbitrage opportunities from multiple exchanges via CCXT
+    const marketSource = (this.dataSourceManager as any).market;
+    return await marketSource.detectArbitrageOpportunities();
   }
 
   private async detectInfluencerSignals(): Promise<InfluencerSignal[]> {
-    // Simulated influencer tracking
-    return [
-      {
-        influencer: 'crypto_analyst_pro',
-        asset: 'BTC',
-        sentiment: 'bullish',
-        historicalAccuracy: 0.75,
-        followupPotential: 0.8,
-        reach: 100000,
-        engagement: 0.05
-      }
-    ];
+    // Real influencer signals from CryptoPanic important news
+    const influencerSource = (this.dataSourceManager as any).influencer;
+    return await influencerSource.detectInfluencerSignals();
   }
 
   private async detectTechnicalBreakouts(): Promise<TechnicalBreakout[]> {
-    // Simulated technical analysis
-    return [
-      {
-        asset: 'BTC',
-        pattern: 'ascending_triangle',
-        timeframe: '4h',
-        reliability: 0.8,
-        momentum: 0.85,
-        volume: 0.9
-      }
-    ];
+    // Real technical analysis from CoinGecko OHLCV data
+    const technicalSource = (this.dataSourceManager as any).technical;
+    return await technicalSource.detectTechnicalBreakouts();
   }
 
   private async detectInstitutionalFlows(): Promise<InstitutionalFlow[]> {
-    // Simulated institutional tracking
-    return [
-      {
-        institution: 'grayscale',
-        direction: 'inflow',
-        asset: 'BTC',
-        amount: 50000000, // $50M
-        certainty: 0.9,
-        marketImpact: 0.8
-      }
-    ];
+    // Real institutional holdings from CoinGecko public treasury data
+    const institutionalSource = (this.dataSourceManager as any).institutional;
+    return await institutionalSource.detectInstitutionalFlows();
   }
+
+  private async detectDerivativesSignals(): Promise<DerivativesSignal[]> {
+    // Real derivatives data from Binance futures API
+    const derivativesSource = (this.dataSourceManager as any).derivatives;
+    return await derivativesSource.detectDerivativesSignals();
+  }
+
+  private async detectMacroSignals(): Promise<MacroSignal[]> {
+    // Real macro indicators from Fear & Greed Index and CoinGecko global data
+    const macroSource = (this.dataSourceManager as any).macro;
+    return await macroSource.detectMacroSignals();
+  }
+
+  // Dummy implementations for shouldHunt methods
+  private shouldHuntOnchain(groundsEffectiveness: any, marketConditions: any): boolean { return true; }
+  private shouldHuntSocial(groundsEffectiveness: any, marketConditions: any): boolean { return true; }
+  private shouldHuntMarkets(groundsEffectiveness: any, marketConditions: any): boolean { return true; }
+  private shouldHuntPersonalities(groundsEffectiveness: any, marketConditions: any): boolean { return true; }
+  private shouldHuntTechnical(groundsEffectiveness: any, marketConditions: any): boolean { return true; }
+  private shouldHuntInstitutional(groundsEffectiveness: any, marketConditions: any): boolean { return true; }
+  private shouldHuntDerivatives(groundsEffectiveness: any, marketConditions: any): boolean { return true; }
+  private shouldHuntMacro(groundsEffectiveness: any, marketConditions: any): boolean { return true; }
+
+  // Dummy implementations for calculateAlphaValue methods
+  private async calculateWhaleAlphaValue(movement: WhaleMovement): Promise<number> { return 0.8; }
+  private async calculateNarrativeAlphaValue(signal: NarrativeSignal): Promise<number> { return 0.75; }
+  private async calculateInfluencerAlphaValue(signal: InfluencerSignal): Promise<number> { return 0.7; }
+  private async calculateTechnicalAlphaValue(breakout: TechnicalBreakout): Promise<number> { return 0.85; }
+  private async calculateInstitutionalAlphaValue(flow: InstitutionalFlow): Promise<number> { return 0.9; }
+  private async calculateDerivativesAlphaValue(signal: DerivativesSignal): Promise<number> { return 0.82; }
+  private async calculateMacroAlphaValue(signal: MacroSignal): Promise<number> { return 0.78; }
+
+  // Dummy implementations for generateInsight methods
+  private generateWhaleInsight(movement: WhaleMovement): string { return `Actionable insight for whale movement.`; }
+  private generateNarrativeInsight(signal: NarrativeSignal): string { return `Actionable insight for narrative shift.`; }
+  private generateInfluencerInsight(signal: InfluencerSignal): string { return `Actionable insight for influencer signal.`; }
+  private generateTechnicalInsight(breakout: TechnicalBreakout): string { return `Actionable insight for technical breakout.`; }
+  private generateInstitutionalInsight(flow: InstitutionalFlow): string { return `Actionable insight for institutional flow.`; }
+
+  // Dummy implementations for other helper methods
+  private calculateUrgency(movement: WhaleMovement): 'low' | 'medium' | 'high' { return 'high'; }
+  private async assessHuntingEnvironment(): Promise<any> { return { marketRegime: 'volatile', volatility: 0.8, volume: 0.9, competitorActivity: 0.5, dataQuality: 0.9 }; }
+  private async analyzeGroundsEffectiveness(): Promise<any> { return {}; }
+  private get marketRegime(): any { return { getConditions: () => ({}) }; }
+  private async identifyCompetitors(): Promise<any[]> { return []; }
+  private async getMyAlphaHistory(): Promise<any> { return {}; }
+  private async benchmarkPerformance(competitors: any[], myPerformance: any): Promise<any> { return {}; }
+  private isLaggingCompetition(metrics: any): boolean { return false; }
+  private async pivotStrategy(metrics: any): Promise<void> {}
+  private identifyUniqueAdvantages(metrics: any): string[] { return []; }
+  private assessCompetitiveThreat(metrics: any): number { return 0; }
+  private async recalibrateStrategy(newRegime: any): Promise<any> { return {}; }
+  private adjustThresholds(newRegime: any): any { return { alpha: 0.7 }; }
+  private calculateAverageAlphaValue(): number { return 0; }
+  private async calculateHuntingEffectiveness(): Promise<any> { return {}; }
+  private async getCompetitiveRank(): Promise<number> { return 1; }
+  private analyzeDiscoveryPatterns(discoveries: AlphaDiscovery[]): any { return {}; }
+  private async executeStrategyUpdate(decision: AgentDecision): Promise<boolean> { return true; }
+  private async executeThresholdAdjustment(decision: AgentDecision): Promise<boolean> { return true; }
+  private async executeCompetitivePivot(decision: AgentDecision): Promise<boolean> { return true; }
+  private async calculateHuntingEfficiency(): Promise<number> { return 0; }
+  private async calculateRegimeAdaptability(): Promise<number> { return 0; }
+  private async calculateInnovationScore(): Promise<number> { return 0; }
+  private async calculateCollaborationScore(): Promise<number> { return 0; }
+  private async calculateOptimalThreshold(environment: HuntingEnvironment): Promise<number> { return 0.7; }
 
   // Additional helper methods would be implemented here...
   private rankDiscoveries(discoveries: AlphaDiscovery[]): AlphaDiscovery[] {
@@ -665,7 +736,7 @@ class HuntingGrounds {
 
 // Supporting interfaces
 interface AlphaDiscovery {
-  type: 'whale_movement' | 'narrative_shift' | 'arbitrage_opportunity' | 'influencer_signal' | 'technical_breakout' | 'institutional_flow';
+  type: 'whale_movement' | 'narrative_shift' | 'arbitrage_opportunity' | 'influencer_signal' | 'technical_breakout' | 'institutional_flow' | 'derivatives_signal' | 'macro_signal';
   description: string;
   alphaValue: number;
   confidence: number;
@@ -693,6 +764,8 @@ interface SelectedHuntingGrounds {
   personalities: boolean;
   technical: boolean;
   institutional: boolean;
+  derivatives: boolean;
+  macro: boolean;
 }
 
 interface WhaleMovement {
@@ -703,6 +776,21 @@ interface WhaleMovement {
   confidence: number;
   historicalPattern: string;
   marketImpact: number;
+}
+
+interface DerivativesSignal {
+  asset: string;
+  fundingRate: number;
+  openInterest: number;
+  putCallRatio: number;
+  confidence: number;
+}
+
+interface MacroSignal {
+  indicator: string;
+  value: string;
+  impact: 'low' | 'medium' | 'high';
+  confidence: number;
 }
 
 interface NarrativeSignal {

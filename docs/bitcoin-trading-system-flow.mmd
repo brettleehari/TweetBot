@@ -1,14 +1,14 @@
 graph TD
-    subgraph 🧠 True Agentic Orchestrator Process
+    subgraph Orchestrator["🧠 True Agentic Orchestrator Process"]
         direction LR
         OrchestratorStart([🚀 Start true-agentic-orchestrator.js]) --> OrchestratorInit[⚙️ Initialize Orchestrator]
         OrchestratorInit --> AgentCreation[🤖 Create Agentic Agents]
-        OrchestratorInit --> DBConnect1[(�️)]
+        OrchestratorInit --> DBConnect1[(🗄️)]
         
         OrchestratorInit --> StrategicCycles{⏰ Strategic Orchestration Cycles}
-        StrategicCycles --> AssessState[� Assess System State]
+        StrategicCycles --> AssessState[📊 Assess System State]
         AssessState --> ExternalAPIs[🌐 Fetch External Data]
-        ExternalAPIs --> CoinGecko[� CoinGecko Price]
+        ExternalAPIs --> CoinGecko[🪙 CoinGecko Price]
         
         AssessState --> MakeDecisions[🧠 Make Strategic Decisions]
         MakeDecisions --> ExpertMethodology[🏆 Use BTC Expert Methodology]
@@ -16,14 +16,13 @@ graph TD
         
         LogToDB --> DB_Portfolio_Write([fa:fa-edit Portfolio])
         LogToDB --> DB_Trades_Write([fa:fa-edit Trades])
-        LogTogether with a descriptive commit message.
         LogToDB --> DB_History_Write([fa:fa-edit History])
         LogToDB --> DB_Logs_Write([fa:fa-edit Agent Logs])
     end
 
-    subgraph 🌐 Web Server & API Process
+    subgraph Server["🌐 Web Server & API Process"]
         direction LR
-        ServerStart([� Start real-time-server.js]) --> ExpressInit[� Initialize Express Server]
+        ServerStart([🌐 Start real-time-server.js]) --> ExpressInit[⚙️ Initialize Express Server]
         ExpressInit --> StaticServing[📁 Serve Static Dashboard]
         ExpressInit --> APIEndpoints[🔌 Define API Endpoints]
         ExpressInit --> DBConnect2[(🗄️)]
@@ -39,15 +38,14 @@ graph TD
         API_TradeHistory --> DB_Trades_Read([fa:fa-book-open Trades])
     end
 
-    subgraph �️ Central Database [Single Source of Truth]
+    subgraph DB["🗄️ Central Database - Single Source of Truth"]
         direction TB
-        style CentralDatabase fill:#f0f4f8,stroke:#b0c4de
         Database[(trading.db)]
     end
     
-    subgraph �️ User Dashboard
+    subgraph UI["🖥️ User Dashboard"]
         direction TB
-        User([� User]) --> Dashboard[📊 View Dashboard]
+        User([👤 User]) --> Dashboard[📊 View Dashboard]
         Dashboard --> Call_API_Portfolio["Request Portfolio"]
         Dashboard --> Call_API_Performance["Request Performance"]
         Dashboard --> Call_API_AgentStatus["Request Agent Status"]
@@ -57,7 +55,7 @@ graph TD
     DBConnect1 --> Database
     DBConnect2 --> Database
     
-    LogToDB -- writes to --> Database
+    LogToDB --> Database
     
     DB_Portfolio_Read --> API_Portfolio
     DB_History_Read --> API_Performance
@@ -75,7 +73,7 @@ graph TD
     classDef entry fill:#d1e0e0,stroke:#85adad,stroke-width:2px,font-weight:bold
 
     class OrchestratorStart,ServerStart entry
-    class "🧠 True Agentic Orchestrator Process" process
-    class "🌐 Web Server & API Process" process
-    class "🗄️ Central Database [Single Source of Truth]" database
-    class "🖥️ User Dashboard" user
+    class Orchestrator process
+    class Server process
+    class DB database
+    class UI user

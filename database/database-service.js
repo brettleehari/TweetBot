@@ -42,6 +42,13 @@ class DatabaseService {
                 console.log('💰 Initial portfolio created with $10,000 USD.');
             }
 
+            // Initialize system status if not set
+            const status = await this.getSystemConfig('system_status');
+            if (status === null) {
+                console.log("First run: Setting initial system_status to 'running'.");
+                await this.setSystemConfig('system_status', 'running');
+            }
+
         } catch (error) {
             console.error('❌ Database initialization error:', error);
         }
@@ -239,6 +246,101 @@ class DatabaseService {
         `;
         return await this.runQuery(query, [limit]);
     }
+
+    // --- Production-Grade Features: System Commands & Alerts ---
+
+    /**
+     * Creates a new command for the system to execute.
+     * @param {string} command - e.g., 'PAUSE_TRADING', 'MANUAL_BUY'
+     * @param {object} parameters - JSON object with command parameters
+     * @param {string} executed_by - Identifier of the command issuer
+     */
+    async createSystemCommand(command, parameters = null, executed_by = 'user:dashboard') {
+        const query = `
+            INSERT INTO system_commands (command, parameters, executed_by)
+            VALUES (?, ?, ?)
+        `;
+        const params = [command, parameters ? JSON.stringify(parameters) : null, executed_by];
+        return await this.runQuery(query, params);
+    }
+
+    /**
+     * Fetches all commands that have not been executed yet.
+     */
+    async getPendingSystemCommands() {
+        const query = `
+            SELECT * FROM system_commands
+            WHERE status = 'PENDING'
+            ORDER BY timestamp ASC
+        `;
+        const results = await this.runQuery(query);
+        // Parse the JSON parameters string back into an object
+        return results.map(cmd => ({
+            ...cmd,
+            parameters: cmd.parameters ? JSON.parse(cmd.parameters) : null
+        }));
+    }
+
+    /**
+     * Updates the status of a system command.
+     * @param {number} id - The ID of the command to update.
+     * @param {string} status - The new status ('EXECUTED', 'FAILED').
+     */
+    async updateSystemCommandStatus(id, status) {
+        const query = `
+            UPDATE system_commands
+            SET status = ?, executed_at = datetime('now')
+            WHERE id = ?
+        `;
+        return await this.runQuery(query, [status, id]);
+    }
+
+    /**
+     * Creates a new system alert.
+     * @param {string} severity - 'INFO', 'WARNING', 'CRITICAL'
+     * @param {string} alert_type - e.g., 'LARGE_TRADE', 'SYSTEM_ERROR'
+     * @param {string} message - The alert message.
+     * @param {object} details - JSON object with contextual details.
+     */
+    async createSystemAlert(severity, alert_type, message, details = null) {
+        const query = `
+            INSERT INTO system_alerts (severity, alert_type, message, details)
+            VALUES (?, ?, ?, ?)
+        `;
+        const params = [severity, alert_type, message, details ? JSON.stringify(details) : null];
+        return await this.runQuery(query, params);
+    }
+
+    /**
+     * Fetches all unacknowledged alerts, optionally filtered by severity.
+     */
+    async getUnacknowledgedAlerts(minSeverity = 'INFO') {
+        const severityOrder = { 'INFO': 1, 'WARNING': 2, 'CRITICAL': 3 };
+        const minSeverityLevel = severityOrder[minSeverity] || 1;
+
+        const query = `
+            SELECT * FROM system_alerts
+            WHERE is_acknowledged = 0
+            ORDER BY timestamp DESC
+        `;
+        const allAlerts = await this.runQuery(query);
+        
+        return allAlerts.filter(alert => (severityOrder[alert.severity] || 0) >= minSeverityLevel);
+    }
+
+    /**
+     * Marks a specific alert as acknowledged.
+     * @param {number} id - The ID of the alert to acknowledge.
+     */
+    async acknowledgeAlert(id) {
+        const query = `
+            UPDATE system_alerts
+            SET is_acknowledged = 1
+            WHERE id = ?
+        `;
+        return await this.runQuery(query, [id]);
+    }
+
 
     // Performance Analytics - FIXED CALCULATIONS
     async getPortfolioPerformance() {
@@ -538,6 +640,310 @@ class DatabaseService {
             console.error(`❌ ${errorMessage}`);
             throw new Error(errorMessage); // Fail fast
         }
+    }
+
+    // --- System Config & Control ---
+
+    async getSystemConfig(key, defaultValue = null) {
+        const query = `SELECT value FROM system_config WHERE key = ?`;
+        const result = await this.runQuery(query, [key]);
+        return result[0] ? result[0].value : defaultValue;
+    }
+
+    async setSystemConfig(key, value) {
+        const query = `INSERT INTO system_config (key, value) VALUES (?, ?)
+                       ON CONFLICT(key) DO UPDATE SET value = ?, last_updated = CURRENT_TIMESTAMP`;
+        return await this.runQuery(query, [key, value, value]);
+    }
+
+    async createSystemCommand(command, parameters = null) {
+        const query = `INSERT INTO system_commands (command, parameters) VALUES (?, ?)`;
+        return await this.runQuery(query, [command, JSON.stringify(parameters)]);
+    }
+
+    async getPendingCommands() {
+        const query = `SELECT * FROM system_commands WHERE status = 'pending' ORDER BY created_at ASC`;
+        return await this.runQuery(query);
+    }
+
+    async updateCommandStatus(id, status) {
+        const query = `UPDATE system_commands SET status = ?, processed_at = CURRENT_TIMESTAMP WHERE id = ?`;
+        return await this.runQuery(query, [status, id]);
+    }
+
+    async createSystemAlert(alert_type, message, level = 'info') {
+        const query = `INSERT INTO system_alerts (alert_type, message, level) VALUES (?, ?, ?)`;
+        return await this.runQuery(query, [alert_type, message, level]);
+    }
+
+    async getRecentAlerts(limit = 20) {
+        const query = `SELECT * FROM system_alerts ORDER BY timestamp DESC LIMIT ?`;
+        return await this.runQuery(query, [limit]);
+    }
+
+    // =================================================================================
+    // MARKET HUNTER DATA SOURCES - Storage Methods
+    // =================================================================================
+
+    // 1. Whale Movements
+    async saveWhaleMovements(movements) {
+        const query = `
+            INSERT INTO whale_movements (asset, amount, from_address, to_address, confidence, 
+                                        historical_pattern, market_impact, tx_hash, tx_timestamp)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+        const results = [];
+        for (const m of movements) {
+            try {
+                const result = await this.runQuery(query, [
+                    m.asset, m.amount, m.from, m.to, m.confidence,
+                    m.historicalPattern, m.marketImpact, m.txHash || null, 
+                    m.timestamp || new Date().toISOString()
+                ]);
+                results.push(result);
+            } catch (error) {
+                console.error('Error saving whale movement:', error.message);
+            }
+        }
+        return results;
+    }
+
+    async getRecentWhaleMovements(limit = 50) {
+        const query = `SELECT * FROM whale_movements ORDER BY timestamp DESC LIMIT ?`;
+        return await this.runQuery(query, [limit]);
+    }
+
+    // 2. Narrative Shifts
+    async saveNarrativeShifts(shifts) {
+        const query = `
+            INSERT INTO narrative_shifts (theme, strength, velocity, sources, key_influencers, 
+                                         sentiment, novelty)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `;
+        const results = [];
+        for (const s of shifts) {
+            try {
+                const result = await this.runQuery(query, [
+                    s.theme, s.strength, s.velocity, 
+                    JSON.stringify(s.sources), JSON.stringify(s.keyInfluencers),
+                    s.sentiment, s.novelty
+                ]);
+                results.push(result);
+            } catch (error) {
+                console.error('Error saving narrative shift:', error.message);
+            }
+        }
+        return results;
+    }
+
+    async getRecentNarrativeShifts(limit = 50) {
+        const query = `SELECT * FROM narrative_shifts ORDER BY timestamp DESC LIMIT ?`;
+        return await this.runQuery(query, [limit]);
+    }
+
+    // 3. Arbitrage Opportunities
+    async saveArbitrageOpportunities(opportunities) {
+        const query = `
+            INSERT INTO arbitrage_opportunities (buy_exchange, sell_exchange, asset, spread_percent, 
+                                                volume, execution_speed, profit_potential)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `;
+        const results = [];
+        for (const o of opportunities) {
+            try {
+                const result = await this.runQuery(query, [
+                    o.buyExchange, o.sellExchange, o.asset, o.spreadPercent,
+                    o.volume, o.executionSpeed, o.profitPotential
+                ]);
+                results.push(result);
+            } catch (error) {
+                console.error('Error saving arbitrage opportunity:', error.message);
+            }
+        }
+        return results;
+    }
+
+    async getRecentArbitrageOpportunities(limit = 50) {
+        const query = `SELECT * FROM arbitrage_opportunities ORDER BY timestamp DESC LIMIT ?`;
+        return await this.runQuery(query, [limit]);
+    }
+
+    // 4. Influencer Signals
+    async saveInfluencerSignals(signals) {
+        const query = `
+            INSERT INTO influencer_signals (influencer, asset, sentiment, historical_accuracy, 
+                                           followup_potential, reach, engagement)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `;
+        const results = [];
+        for (const s of signals) {
+            try {
+                const result = await this.runQuery(query, [
+                    s.influencer, s.asset, s.sentiment, s.historicalAccuracy,
+                    s.followupPotential, s.reach, s.engagement
+                ]);
+                results.push(result);
+            } catch (error) {
+                console.error('Error saving influencer signal:', error.message);
+            }
+        }
+        return results;
+    }
+
+    async getRecentInfluencerSignals(limit = 50) {
+        const query = `SELECT * FROM influencer_signals ORDER BY timestamp DESC LIMIT ?`;
+        return await this.runQuery(query, [limit]);
+    }
+
+    // 5. Technical Breakouts
+    async saveTechnicalBreakouts(breakouts) {
+        const query = `
+            INSERT INTO technical_breakouts (asset, pattern, strength, volume, historical_success, 
+                                            key_levels, timeframe, confirmation)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+        const results = [];
+        for (const b of breakouts) {
+            try {
+                const result = await this.runQuery(query, [
+                    b.asset, b.pattern, b.strength, b.volume, b.historicalSuccess,
+                    JSON.stringify(b.keyLevels), b.timeframe, b.confirmation ? 1 : 0
+                ]);
+                results.push(result);
+            } catch (error) {
+                console.error('Error saving technical breakout:', error.message);
+            }
+        }
+        return results;
+    }
+
+    async getRecentTechnicalBreakouts(limit = 50) {
+        const query = `SELECT * FROM technical_breakouts ORDER BY timestamp DESC LIMIT ?`;
+        return await this.runQuery(query, [limit]);
+    }
+
+    // 6. Institutional Flows
+    async saveInstitutionalFlows(flows) {
+        const query = `
+            INSERT INTO institutional_flows (institution, direction, asset, amount, certainty, market_impact)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `;
+        const results = [];
+        for (const f of flows) {
+            try {
+                const result = await this.runQuery(query, [
+                    f.institution, f.direction, f.asset, f.amount, f.certainty, f.marketImpact
+                ]);
+                results.push(result);
+            } catch (error) {
+                console.error('Error saving institutional flow:', error.message);
+            }
+        }
+        return results;
+    }
+
+    async getRecentInstitutionalFlows(limit = 50) {
+        const query = `SELECT * FROM institutional_flows ORDER BY timestamp DESC LIMIT ?`;
+        return await this.runQuery(query, [limit]);
+    }
+
+    // 7. Derivatives Signals
+    async saveDerivativesSignals(signals) {
+        const query = `
+            INSERT INTO derivatives_signals (asset, metric, value, sentiment, significance, liquidation_risk)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `;
+        const results = [];
+        for (const s of signals) {
+            try {
+                const result = await this.runQuery(query, [
+                    s.asset, s.metric, s.value, s.sentiment, s.significance, s.liquidationRisk
+                ]);
+                results.push(result);
+            } catch (error) {
+                console.error('Error saving derivatives signal:', error.message);
+            }
+        }
+        return results;
+    }
+
+    async getRecentDerivativesSignals(limit = 50) {
+        const query = `SELECT * FROM derivatives_signals ORDER BY timestamp DESC LIMIT ?`;
+        return await this.runQuery(query, [limit]);
+    }
+
+    // 8. Macro Signals
+    async saveMacroSignals(signals) {
+        const query = `
+            INSERT INTO macro_signals (indicator, value, impact, confidence)
+            VALUES (?, ?, ?, ?)
+        `;
+        const results = [];
+        for (const s of signals) {
+            try {
+                const result = await this.runQuery(query, [
+                    s.indicator, s.value, s.impact, s.confidence
+                ]);
+                results.push(result);
+            } catch (error) {
+                console.error('Error saving macro signal:', error.message);
+            }
+        }
+        return results;
+    }
+
+    async getRecentMacroSignals(limit = 50) {
+        const query = `SELECT * FROM macro_signals ORDER BY timestamp DESC LIMIT ?`;
+        return await this.runQuery(query, [limit]);
+    }
+
+    // Bulk save all Market Hunter data sources
+    async saveAllMarketHunterData(data) {
+        const results = {
+            whaleMovements: 0,
+            narrativeShifts: 0,
+            arbitrageOpportunities: 0,
+            influencerSignals: 0,
+            technicalBreakouts: 0,
+            institutionalFlows: 0,
+            derivativesSignals: 0,
+            macroSignals: 0
+        };
+
+        if (data.whaleMovements?.length > 0) {
+            await this.saveWhaleMovements(data.whaleMovements);
+            results.whaleMovements = data.whaleMovements.length;
+        }
+        if (data.narrativeShifts?.length > 0) {
+            await this.saveNarrativeShifts(data.narrativeShifts);
+            results.narrativeShifts = data.narrativeShifts.length;
+        }
+        if (data.arbitrageOpportunities?.length > 0) {
+            await this.saveArbitrageOpportunities(data.arbitrageOpportunities);
+            results.arbitrageOpportunities = data.arbitrageOpportunities.length;
+        }
+        if (data.influencerSignals?.length > 0) {
+            await this.saveInfluencerSignals(data.influencerSignals);
+            results.influencerSignals = data.influencerSignals.length;
+        }
+        if (data.technicalBreakouts?.length > 0) {
+            await this.saveTechnicalBreakouts(data.technicalBreakouts);
+            results.technicalBreakouts = data.technicalBreakouts.length;
+        }
+        if (data.institutionalFlows?.length > 0) {
+            await this.saveInstitutionalFlows(data.institutionalFlows);
+            results.institutionalFlows = data.institutionalFlows.length;
+        }
+        if (data.derivativesSignals?.length > 0) {
+            await this.saveDerivativesSignals(data.derivativesSignals);
+            results.derivativesSignals = data.derivativesSignals.length;
+        }
+        if (data.macroSignals?.length > 0) {
+            await this.saveMacroSignals(data.macroSignals);
+            results.macroSignals = data.macroSignals.length;
+        }
+
+        return results;
     }
 
     // Cleanup and maintenance

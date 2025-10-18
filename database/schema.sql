@@ -98,9 +98,146 @@ CREATE TABLE IF NOT EXISTS news_analysis (
     source VARCHAR(100),
     sentiment_score DECIMAL(3,2), -- -1 to 1
     relevance_score DECIMAL(3,2), -- 0 to 1
-    impact_prediction VARCHAR(20), -- 'bullish', 'bearish', 'neutral'
-    analyzed_by VARCHAR(50) DEFAULT 'market-analyzer'
+    impact_prediction TEXT
 );
+
+-- =================================================================================
+-- MARKET HUNTER DATA SOURCES TABLES
+-- =================================================================================
+
+-- 1. Whale Movements (On-chain large transactions)
+CREATE TABLE IF NOT EXISTS whale_movements (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    asset VARCHAR(10) NOT NULL,
+    amount DECIMAL(16,8) NOT NULL,
+    from_address TEXT,
+    to_address TEXT,
+    confidence DECIMAL(3,2),
+    historical_pattern VARCHAR(50),
+    market_impact DECIMAL(3,2),
+    tx_hash TEXT,
+    tx_timestamp DATETIME
+);
+
+-- 2. Narrative Shifts (Social/trending themes)
+CREATE TABLE IF NOT EXISTS narrative_shifts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    theme TEXT NOT NULL,
+    strength DECIMAL(3,2),
+    velocity DECIMAL(3,2),
+    sources TEXT, -- JSON array
+    key_influencers TEXT, -- JSON array
+    sentiment VARCHAR(20),
+    novelty DECIMAL(3,2)
+);
+
+-- 3. Arbitrage Opportunities (Cross-exchange price differences)
+CREATE TABLE IF NOT EXISTS arbitrage_opportunities (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    buy_exchange VARCHAR(50),
+    sell_exchange VARCHAR(50),
+    asset VARCHAR(10),
+    spread_percent DECIMAL(5,2),
+    volume DECIMAL(15,2),
+    execution_speed VARCHAR(20),
+    profit_potential DECIMAL(5,2)
+);
+
+-- 4. Influencer Signals (Price action / market movers)
+CREATE TABLE IF NOT EXISTS influencer_signals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    influencer VARCHAR(100),
+    asset VARCHAR(10),
+    sentiment VARCHAR(20),
+    historical_accuracy DECIMAL(3,2),
+    followup_potential DECIMAL(5,4),
+    reach BIGINT,
+    engagement DECIMAL(3,2)
+);
+
+-- 5. Technical Breakouts (Chart patterns and key levels)
+CREATE TABLE IF NOT EXISTS technical_breakouts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    asset VARCHAR(10),
+    pattern VARCHAR(50),
+    strength DECIMAL(3,2),
+    volume DECIMAL(15,2),
+    historical_success DECIMAL(3,2),
+    key_levels TEXT, -- JSON array
+    timeframe VARCHAR(10),
+    confirmation BOOLEAN
+);
+
+-- 6. Institutional Flows (Large holder movements)
+CREATE TABLE IF NOT EXISTS institutional_flows (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    institution VARCHAR(100),
+    direction VARCHAR(20),
+    asset VARCHAR(10),
+    amount DECIMAL(16,2),
+    certainty DECIMAL(3,2),
+    market_impact DECIMAL(3,2)
+);
+
+-- 7. Derivatives Signals (Funding rates, open interest)
+CREATE TABLE IF NOT EXISTS derivatives_signals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    asset VARCHAR(10),
+    metric VARCHAR(50),
+    value DECIMAL(10,6),
+    sentiment VARCHAR(20),
+    significance DECIMAL(3,2),
+    liquidation_risk DECIMAL(3,2)
+);
+
+-- 8. Macro Signals (Fear & Greed, market-wide indicators)
+CREATE TABLE IF NOT EXISTS macro_signals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    indicator VARCHAR(100),
+    value TEXT,
+    impact VARCHAR(20),
+    confidence DECIMAL(3,2)
+);
+
+-- =================================================================================
+-- PRODUCTION-GRADE FEATURES
+-- =================================================================================
+
+-- System Configuration & Control Tables
+CREATE TABLE IF NOT EXISTS system_config (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS system_commands (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    command TEXT NOT NULL,
+    parameters TEXT,
+    status TEXT DEFAULT 'pending', -- pending, processing, completed, failed
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    processed_at TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS system_alerts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    alert_type TEXT NOT NULL, -- e.g., 'SYSTEM_PAUSE', 'API_FAILURE', 'HIGH_RISK'
+    message TEXT NOT NULL,
+    level TEXT DEFAULT 'info', -- info, warning, critical
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexes for fast querying of commands and alerts
+CREATE INDEX IF NOT EXISTS idx_system_commands_status ON system_commands(status);
+CREATE INDEX IF NOT EXISTS idx_system_alerts_level ON system_alerts(level);
 
 -- Initialize the single row for the portfolio's live state
 INSERT OR REPLACE INTO portfolio (id, btc_balance, usd_balance, last_updated) 
@@ -112,3 +249,14 @@ CREATE INDEX IF NOT EXISTS idx_market_data_timestamp ON market_data(timestamp);
 CREATE INDEX IF NOT EXISTS idx_agent_executions_timestamp ON agent_executions(timestamp);
 CREATE INDEX IF NOT EXISTS idx_news_analysis_timestamp ON news_analysis(timestamp);
 CREATE INDEX IF NOT EXISTS idx_portfolio_history_timestamp ON portfolio_history(timestamp);
+
+-- Market Hunter data source indexes
+CREATE INDEX IF NOT EXISTS idx_whale_movements_timestamp ON whale_movements(timestamp);
+CREATE INDEX IF NOT EXISTS idx_whale_movements_asset ON whale_movements(asset);
+CREATE INDEX IF NOT EXISTS idx_narrative_shifts_timestamp ON narrative_shifts(timestamp);
+CREATE INDEX IF NOT EXISTS idx_arbitrage_opportunities_timestamp ON arbitrage_opportunities(timestamp);
+CREATE INDEX IF NOT EXISTS idx_influencer_signals_timestamp ON influencer_signals(timestamp);
+CREATE INDEX IF NOT EXISTS idx_technical_breakouts_timestamp ON technical_breakouts(timestamp);
+CREATE INDEX IF NOT EXISTS idx_institutional_flows_timestamp ON institutional_flows(timestamp);
+CREATE INDEX IF NOT EXISTS idx_derivatives_signals_timestamp ON derivatives_signals(timestamp);
+CREATE INDEX IF NOT EXISTS idx_macro_signals_timestamp ON macro_signals(timestamp);

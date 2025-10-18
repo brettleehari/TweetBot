@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Optimizer Agent - Visual Flow</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            color: #333;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+        }
+        
+        .cycle-section {
+            margin: 30px 0;
+            padding: 20px;
+            border-left: 4px solid #4ecdc4;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .cycle-section h2 {
+            color: #4ecdc4;
+            margin-top: 0;
+        }
+        
+        .flow-diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 30px 0;
+        }
+        
+        .flow-box {
+            background: white;
+            border: 3px solid #4ecdc4;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            width: 80%;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .flow-box:hover {
+            transform: translateX(10px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+        
+        .flow-box h3 {
+            margin: 0 0 10px 0;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+        }
+        
+        .flow-box .icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        
+        .flow-arrow {
+            font-size: 30px;
+            color: #4ecdc4;
+            margin: 10px 0;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-top: 4px solid #ff6b6b;
+        }
+        
+        .metric-card h4 {
+            margin: 0 0 10px 0;
+            color: #ff6b6b;
+        }
+        
+        .metric-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+        
+        .metric-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .optimization-types {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .opt-tag {
+            background: #4ecdc4;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .example-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffd93d;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .example-box h3 {
+            color: #d4a100;
+            margin-top: 0;
+        }
+        
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+        }
+        
+        .improvement-bar {
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 10px 0;
+            position: relative;
+        }
+        
+        .improvement-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #44a3d5);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 15px;
+            color: white;
+            font-weight: bold;
+            transition: width 2s ease;
+        }
+        
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .stats-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .stats-table td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .stats-table tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ Performance Optimizer Agent</h1>
+        <p class="subtitle">Autonomous System-Wide Optimization Engine | 80-95% Autonomy</p>
+        
+        <div class="cycle-section">
+            <h2>🔄 Autonomous Optimization Cycle</h2>
+            <p>The Performance Optimizer runs continuous cycles every 5-10 minutes, autonomously improving system performance without human intervention.</p>
+            
+            <div class="flow-diagram">
+                <div class="flow-box">
+                    <h3><span class="icon">📊</span> Phase 1: Collect System Metrics</h3>
+                    <ul>
+                        <li><strong>Agent Performance</strong>: Decision count, success rate, response time, coordination score</li>
+                        <li><strong>Resource Utilization</strong>: CPU, memory, network, storage usage</li>
+                        <li><strong>Decision Quality</strong>: Confidence levels, accuracy rates, decision speed</li>
+                        <li><strong>Coordination Efficiency</strong>: Message latency, conflict resolution time</li>
+                    </ul>
+                    <div class="highlight">Collection Time: 40-80ms</div>
+                </div>
+                
+                <div class="flow-arrow">↓</div>
+                
+                <div class="flow-box">
+                    <h3><span class="icon">🔍</span> Phase 2: Identify Bottlenecks</h3>
+                    <ul>
+                        <li><strong>Response Time</strong>: Flag agents with >2000ms response time</li>
+                        <li><strong>Success Rate</strong>: Identify agents below 70% success rate</li>
+                        <li><strong>Coordination</strong>: Detect coordination scores below 60%</li>
+                        <li><strong>System Score</strong>: Alert if overall performance below 75%</li>
+                    </ul>
+                    <div class="highlight">Detection Time: 20-50ms</div>
+                </div>
+                
+                <div class="flow-arrow">↓</div>
+                
+                <div class="flow-box">
+                    <h3><span class="icon">🎯</span> Phase 3: Generate Optimization Strategies</h3>
+                    <ul>
+                        <li><strong>Reactive</strong>: Create fixes for identified bottlenecks</li>
+                        <li><strong>Proactive</strong>: Generate predictive optimizations</li>
+                        <li><strong>Prioritize</strong>: Rank by severity and expected improvement</li>
+                        <li><strong>Plan</strong>: Define actions, metrics, and rollback procedures</li>
+                    </ul>
+                    <div class="highlight">Strategy Generation: 10-30ms</div>
+                </div>
+                
+                <div class="flow-arrow">↓</div>
+                
+                <div class="flow-box">
+                    <h3><span class="icon">🚀</span> Phase 4: Execute Optimizations</h3>
+                    <ul>
+                        <li><strong>Implement</strong>: Apply highest-priority optimizations first</li>
+                        <li><strong>Monitor</strong>: Real-time performance tracking during execution</li>
+                        <li><strong>Rollback</strong>: Automatic revert if performance degrades</li>
+                        <li><strong>Track</strong>: Record success/failure for each optimization</li>
+                    </ul>
+                    <div class="highlight">Execution Time: 2-10 minutes per optimization</div>
+                </div>
+                
+                <div class="flow-arrow">↓</div>
+                
+                <div class="flow-box">
+                    <h3><span class="icon">📈</span> Phase 5: Measure Impact & Learn</h3>
+                    <ul>
+                        <li><strong>Calculate</strong>: Measure actual vs. expected improvements</li>
+                        <li><strong>Categorize</strong>: Group improvements by optimization type</li>
+                        <li><strong>Learn</strong>: Update success metrics for future cycles</li>
+                        <li><strong>Report</strong>: Send results to Strategic Orchestrator</li>
+                    </ul>
+                    <div class="highlight">Measurement Time: 10-20ms</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="cycle-section">
+            <h2>📊 Monitored Metrics</h2>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h4>Response Time</h4>
+                    <div class="metric-value">1,750ms</div>
+                    <div class="metric-label">Target: &lt;2,000ms</div>
+                    <div class="improvement-bar">
+                        <div class="improvement-fill" style="width: 87.5%;">✓ 87.5%</div>
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>Success Rate</h4>
+                    <div class="metric-value">68.9%</div>
+                    <div class="metric-label">Target: &gt;70%</div>
+                    <div class="improvement-bar">
+                        <div class="improvement-fill" style="width: 68.9%;">68.9%</div>
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>Coordination Score</h4>
+                    <div class="metric-value">61.8%</div>
+                    <div class="metric-label">Target: &gt;60%</div>
+                    <div class="improvement-bar">
+                        <div class="improvement-fill" style="width: 61.8%;">✓ 61.8%</div>
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>Overall System</h4>
+                    <div class="metric-value">78.3%</div>
+                    <div class="metric-label">Target: &gt;75%</div>
+                    <div class="improvement-bar">
+                        <div class="improvement-fill" style="width: 78.3%;">✓ 78.3%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="cycle-section">
+            <h2>🎯 Optimization Types</h2>
+            <div class="optimization-types">
+                <div class="opt-tag">Agent Response Time</div>
+                <div class="opt-tag">Agent Success Rate</div>
+                <div class="opt-tag">Coordination Efficiency</div>
+                <div class="opt-tag">Predictive Optimization</div>
+                <div class="opt-tag">Resource Allocation</div>
+                <div class="opt-tag">Algorithm Tuning</div>
+                <div class="opt-tag">Cache Optimization</div>
+                <div class="opt-tag">Database Query Optimization</div>
+                <div class="opt-tag">Message Protocol Enhancement</div>
+                <div class="opt-tag">Conflict Resolution</div>
+            </div>
+        </div>
+        
+        <div class="example-box">
+            <h3>💡 Real-World Example: Market Hunter Optimization</h3>
+            <p><strong>Detected Issue:</strong> Market Hunter response time at 2,800ms (40% over threshold)</p>
+            
+            <div class="code-block">
+⚠️  BOTTLENECK DETECTED: market-hunter response time is 2800ms (threshold: 2000ms)
+    Impact: 40.0% | Severity: HIGH
+    
+🔧 Executing optimization: Optimize agent_response_time for market-hunter
+    📈 Actions:
+       - Implementing caching for API results
+       - Parallelizing data source queries
+       - Reducing redundant calculations
+    
+✅ market-hunter response time improved by 22.3%
+    New response time: 2,800ms → 1,750ms ✓ (Target met!)
+            </div>
+            
+            <p><strong>Improvement:</strong></p>
+            <div class="improvement-bar">
+                <div class="improvement-fill" style="width: 22.3%;">22.3% faster</div>
+            </div>
+        </div>
+        
+        <div class="cycle-section">
+            <h2>📈 Performance Statistics</h2>
+            <table class="stats-table">
+                <thead>
+                    <tr>
+                        <th>Optimization Type</th>
+                        <th>Success Rate</th>
+                        <th>Avg Improvement</th>
+                        <th>Execution Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Response Time Optimization</td>
+                        <td>85-95%</td>
+                        <td>10-30%</td>
+                        <td>2 min</td>
+                    </tr>
+                    <tr>
+                        <td>Success Rate Optimization</td>
+                        <td>70-85%</td>
+                        <td>5-20%</td>
+                        <td>5 min</td>
+                    </tr>
+                    <tr>
+                        <td>Coordination Optimization</td>
+                        <td>75-90%</td>
+                        <td>8-20%</td>
+                        <td>3 min</td>
+                    </tr>
+                    <tr>
+                        <td>Predictive Optimization</td>
+                        <td>80-90%</td>
+                        <td>12-20%</td>
+                        <td>5 min</td>
+                    </tr>
+                    <tr>
+                        <td>Coordination Enhancement</td>
+                        <td>80-90%</td>
+                        <td>6-14%</td>
+                        <td>3 min</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="cycle-section">
+            <h2>🧠 Agentic Capabilities</h2>
+            <div class="metrics-grid">
+                <div class="metric-card" style="border-top-color: #4ecdc4;">
+                    <h4 style="color: #4ecdc4;">✅ Autonomous Decision-Making</h4>
+                    <p>Independently decides and implements optimizations without approval</p>
+                </div>
+                <div class="metric-card" style="border-top-color: #4ecdc4;">
+                    <h4 style="color: #4ecdc4;">✅ Adaptive Learning</h4>
+                    <p>Tracks outcomes and improves strategies over time</p>
+                </div>
+                <div class="metric-card" style="border-top-color: #4ecdc4;">
+                    <h4 style="color: #4ecdc4;">✅ Proactive Behavior</h4>
+                    <p>Predicts and prevents issues before they occur</p>
+                </div>
+                <div class="metric-card" style="border-top-color: #4ecdc4;">
+                    <h4 style="color: #4ecdc4;">✅ Self-Modification</h4>
+                    <p>Adjusts own optimization strategies based on results</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="cycle-section">
+            <h2>🔗 Agent Interactions</h2>
+            <div class="flow-diagram" style="flex-direction: row; justify-content: space-around; flex-wrap: wrap;">
+                <div class="flow-box" style="width: 30%; min-width: 250px;">
+                    <h3><span class="icon">📥</span> Receives From</h3>
+                    <ul>
+                        <li>Strategic Orchestrator (commands)</li>
+                        <li>All Agents (performance metrics)</li>
+                        <li>Database (historical data)</li>
+                    </ul>
+                </div>
+                <div class="flow-box" style="width: 30%; min-width: 250px;">
+                    <h3><span class="icon">📤</span> Sends To</h3>
+                    <ul>
+                        <li>Strategic Orchestrator (reports)</li>
+                        <li>All Agents (optimizations)</li>
+                        <li>Database (results logs)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+            <h2>🎯 The Performance Optimizer ensures the entire agentic system runs at maximum efficiency!</h2>
+            <p style="color: #666;">Autonomous • Adaptive • Proactive • Continuous</p>
+        </div>
+    </div>
+</body>
+</html>

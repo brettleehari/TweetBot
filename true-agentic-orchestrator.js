@@ -102,7 +102,7 @@ class TrueAgenticSystemOrchestrator {
           console.error('❌ Error in agentic cycle:', error.message);
         }
       }
-    }, 2 * 60 * 1000); // 2 minutes for strategic decisions
+    }, 10 * 60 * 1000); // 10 minutes for strategic decisions
   }
 
   async executeStrategicOrchestrationCycle() {
@@ -110,6 +110,16 @@ class TrueAgenticSystemOrchestrator {
     const cycleStartTime = Date.now();
     
     console.log(`\n🎯 [${timestamp}] STRATEGIC ORCHESTRATION CYCLE`);
+
+    // PHASE 1 INTEGRATION: Process manual commands first
+    await this.processManualCommands();
+
+    // PHASE 1 INTEGRATION: Check system status
+    const systemStatus = await this.db.getSystemConfig('system_status', 'running');
+    if (systemStatus === 'paused') {
+        console.log(`   [${timestamp}] ⏸️ System is PAUSED. Skipping orchestration cycle.`);
+        return; // Stop the cycle if the system is paused
+    }
     
     try {
       // 1. ASSESS SYSTEM STATE
@@ -908,6 +918,52 @@ class TrueAgenticSystemOrchestrator {
     }
     console.log('✅ True Agentic System stopped');
     process.exit(0);
+  }
+
+  // --- PHASE 1: Manual Control & Alerting ---
+
+  async processManualCommands() {
+    const pendingCommands = await this.db.getPendingCommands();
+    if (pendingCommands.length === 0) {
+      return;
+    }
+
+    console.log(`   [${new Date().toLocaleString()}] 📥 Processing ${pendingCommands.length} manual command(s)...`);
+
+    for (const cmd of pendingCommands) {
+      try {
+        console.log(`      - Executing command: ${cmd.command} (ID: ${cmd.id})`);
+        let success = false;
+        switch (cmd.command) {
+          case 'pause_system':
+            await this.db.setSystemConfig('system_status', 'paused');
+            await this.db.createSystemAlert('System Paused', `System was manually paused via command ID ${cmd.id}.`, 'warning');
+            success = true;
+            break;
+          case 'resume_system':
+            await this.db.setSystemConfig('system_status', 'running');
+            await this.db.createSystemAlert('System Resumed', `System was manually resumed via command ID ${cmd.id}.`, 'info');
+            success = true;
+            break;
+          default:
+            console.warn(`      - Unknown command: ${cmd.command}`);
+            await this.db.createSystemAlert('Unknown Command', `Received unknown manual command: ${cmd.command}`, 'error');
+        }
+        
+        if (success) {
+          await this.db.updateCommandStatus(cmd.id, 'processed');
+          console.log(`      - Successfully processed command ID ${cmd.id}.`);
+        } else {
+          await this.db.updateCommandStatus(cmd.id, 'failed');
+          console.error(`      - Failed to process command ID ${cmd.id}.`);
+        }
+
+      } catch (error) {
+        console.error(`      - Error processing command ${cmd.id}:`, error);
+        await this.db.updateCommandStatus(cmd.id, 'failed');
+        await this.db.createSystemAlert('Command Execution Error', `Failed to execute command ${cmd.command} (ID: ${cmd.id}): ${error.message}`, 'error');
+      }
+    }
   }
 }
 

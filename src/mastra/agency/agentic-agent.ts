@@ -17,7 +17,7 @@ export abstract class AgenticAgent {
   protected goals: GoalHierarchy;
   protected personality: AgentPersonality;
   protected reputation: ReputationModel;
-  protected marketRegime: MarketRegime;
+  protected marketRegime: MarketRegime | undefined;
   protected autonomyLevel: number = 0.8; // 0-1 scale
   protected learningRate: number = 0.1;
   protected decisionHistory: AgentDecision[] = [];
@@ -34,7 +34,7 @@ export abstract class AgenticAgent {
     this.goals = new GoalHierarchy(initialGoals);
     this.personality = new AgentPersonality(initialPersonality);
     this.reputation = new ReputationModel();
-    this.marketRegime = new MarketRegime();
+        this.marketRegime = new MarketRegime();
     this.autonomyLevel = autonomyLevel;
   }
 

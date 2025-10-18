@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TweetBot Agent Network Graph</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            text-align: center;
+            margin-bottom: 20px;
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        #graph {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .links line {
+            stroke-opacity: 0.6;
+        }
+        
+        .nodes circle {
+            cursor: pointer;
+            stroke: #fff;
+            stroke-width: 2px;
+        }
+        
+        .nodes text {
+            pointer-events: none;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: 0 1px 2px white, 0 -1px 2px white, 1px 0 2px white, -1px 0 2px white;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            pointer-events: none;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+        
+        .tooltip h3 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            border-bottom: 2px solid #4ecdc4;
+            padding-bottom: 5px;
+        }
+        
+        .tooltip p {
+            margin: 5px 0;
+            line-height: 1.4;
+        }
+        
+        .legend {
+            position: absolute;
+            top: 80px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            color: #333;
+        }
+        
+        .legend h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #667eea;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            font-size: 12px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 8px;
+            border: 2px solid #fff;
+        }
+        
+        .controls {
+            position: absolute;
+            top: 80px;
+            left: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            color: #333;
+        }
+        
+        .controls h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #667eea;
+        }
+        
+        .controls button {
+            display: block;
+            width: 100%;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 5px;
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s;
+        }
+        
+        .controls button:hover {
+            background: #5568d3;
+        }
+        
+        .link-label {
+            font-size: 10px;
+            fill: #666;
+            text-anchor: middle;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>🤖 TweetBot Agent Network Graph</h1>
+    <div class="subtitle">Interactive visualization of 14+ agents and their connections</div>
+    
+    <div class="controls">
+        <h3>🎮 Controls</h3>
+        <button onclick="resetSimulation()">🔄 Reset Layout</button>
+        <button onclick="toggleLabels()">🏷️ Toggle Labels</button>
+        <button onclick="highlightPath('strategic')">🎯 Strategic Path</button>
+        <button onclick="highlightPath('trading')">💰 Trading Path</button>
+        <button onclick="highlightPath('content')">📱 Content Path</button>
+        <button onclick="resetHighlight()">❌ Clear Highlight</button>
+    </div>
+    
+    <div class="legend">
+        <h3>📊 Agent Types</h3>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff6b6b;"></div>
+            <span>Meta-Agents (95%)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #4ecdc4;"></div>
+            <span>Intelligence (85-95%)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ffd93d;"></div>
+            <span>Execution (75%)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #a8e6cf;"></div>
+            <span>Adaptive (75-95%)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #95b8d1;"></div>
+            <span>Task Agents (65-70%)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #b8bedd;"></div>
+            <span>Coordinators (60%)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #f38181;"></div>
+            <span>Data Sources</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #95e1d3;"></div>
+            <span>Database</span>
+        </div>
+    </div>
+    
+    <svg id="graph"></svg>
+    
+    <script>
+        const width = window.innerWidth - 40;
+        const height = window.innerHeight - 140;
+        
+        const svg = d3.select("#graph")
+            .attr("width", width)
+            .attr("height", height);
+        
+        // Define arrow markers
+        svg.append("defs").selectAll("marker")
+            .data(["coordination", "data", "signal", "logs", "query", "manages"])
+            .join("marker")
+            .attr("id", d => `arrow-${d}`)
+            .attr("viewBox", "0 -5 10 10")
+            .attr("refX", 25)
+            .attr("refY", 0)
+            .attr("markerWidth", 6)
+            .attr("markerHeight", 6)
+            .attr("orient", "auto")
+            .append("path")
+            .attr("fill", d => {
+                if (d === "coordination") return "#667eea";
+                if (d === "data") return "#4ecdc4";
+                if (d === "signal") return "#ff6b6b";
+                if (d === "logs") return "#95e1d3";
+                if (d === "query") return "#ffd93d";
+                if (d === "manages") return "#764ba2";
+                return "#999";
+            })
+            .attr("d", "M0,-5L10,0L0,5");
+        
+        const nodes = [
+            // Meta-Agents
+            { id: "strategic-orch", name: "Strategic\nOrchestrator", type: "meta", autonomy: 95, layer: 1, description: "Meta-agent that coordinates all agents, resolves conflicts, makes system-wide decisions" },
+            { id: "true-agentic-orch", name: "True Agentic\nOrchestrator", type: "meta", autonomy: 95, layer: 1, description: "Multi-agent system manager with goal hierarchies and conflict resolution" },
+            
+            // Intelligence Agents
+            { id: "market-hunter", name: "Autonomous\nMarket Hunter", type: "intelligence", autonomy: 90, layer: 1, description: "Monitors 8 data sources, learns from performance, generates market signals every 10 min" },
+            { id: "performance-opt", name: "Performance\nOptimizer", type: "intelligence", autonomy: 88, layer: 1, description: "Analyzes system efficiency, optimizes resources, resolves bottlenecks" },
+            
+            // Adaptive Agents
+            { id: "market-analyzer", name: "Market\nAnalyzer", type: "adaptive", autonomy: 85, layer: 2, description: "Sentiment analysis with Gemini AI, technical analysis, signal generation" },
+            { id: "content-creator", name: "Content\nCreator", type: "adaptive", autonomy: 85, layer: 2, description: "Generates optimized tweets, hashtags, predicts engagement" },
+            
+            // Execution Agent
+            { id: "intelligent-exec", name: "Intelligent\nExecution", type: "execution", autonomy: 75, layer: 3, description: "Makes trading decisions every 1 min with $10K corpus, 5% weekly target" },
+            
+            // Task Agents
+            { id: "data-collector", name: "Data\nCollector", type: "task", autonomy: 70, layer: 2, description: "Fetches Bitcoin prices and news from Alpha Vantage, CoinGecko, News API" },
+            { id: "social-publisher", name: "Social\nPublisher", type: "task", autonomy: 65, layer: 2, description: "Posts to Twitter/X, tracks engagement metrics" },
+            { id: "reddit-publisher", name: "Reddit\nPublisher", type: "task", autonomy: 65, layer: 2, description: "Posts to r/Bitcoin, r/BitcoinMarkets, r/CryptoCurrency" },
+            
+            // Coordinator
+            { id: "bitcoin-orch", name: "Bitcoin\nOrchestrator", type: "coordinator", autonomy: 60, layer: 2, description: "Coordinates workflows, schedules tasks, dispatches events" },
+            
+            // Data Sources
+            { id: "whale-data", name: "Whale\nMovements", type: "datasource", autonomy: 0, layer: 4, description: "Blockchain.info - Transactions > 5 BTC" },
+            { id: "narrative-data", name: "Narrative\nShifts", type: "datasource", autonomy: 0, layer: 4, description: "CoinGecko Trending - Social momentum" },
+            { id: "arbitrage-data", name: "Arbitrage\nOpps", type: "datasource", autonomy: 0, layer: 4, description: "CCXT - Exchange price differences" },
+            { id: "influencer-data", name: "Influencer\nSignals", type: "datasource", autonomy: 0, layer: 4, description: "CoinGecko - Top movers" },
+            { id: "technical-data", name: "Technical\nBreakouts", type: "datasource", autonomy: 0, layer: 4, description: "OHLC pattern detection" },
+            { id: "institutional-data", name: "Institutional\nFlows", type: "datasource", autonomy: 0, layer: 4, description: "Public company Bitcoin treasuries" },
+            { id: "derivatives-data", name: "Derivatives\nSignals", type: "datasource", autonomy: 0, layer: 4, description: "Coinglass - Funding rates" },
+            { id: "macro-data", name: "Macro\nSignals", type: "datasource", autonomy: 0, layer: 4, description: "Fear & Greed Index, BTC dominance" },
+            
+            // Database
+            { id: "database", name: "SQLite\nDatabase", type: "database", autonomy: 0, layer: 5, description: "50+ tables storing decisions, market data, trading history" }
+        ];
+        
+        const links = [
+            // Strategic Orchestrator connections
+            { source: "strategic-orch", target: "market-hunter", type: "coordination", label: "coordinates" },
+            { source: "strategic-orch", target: "performance-opt", type: "coordination", label: "optimizes" },
+            { source: "strategic-orch", target: "market-analyzer", type: "manages", label: "manages" },
+            { source: "strategic-orch", target: "content-creator", type: "manages", label: "manages" },
+            { source: "strategic-orch", target: "intelligent-exec", type: "manages", label: "manages" },
+            
+            // True Agentic Orchestrator connections
+            { source: "true-agentic-orch", target: "strategic-orch", type: "manages", label: "manages" },
+            { source: "true-agentic-orch", target: "market-hunter", type: "coordination", label: "monitors" },
+            
+            // Market Hunter to data sources
+            { source: "market-hunter", target: "whale-data", type: "query", label: "queries" },
+            { source: "market-hunter", target: "narrative-data", type: "query", label: "queries" },
+            { source: "market-hunter", target: "arbitrage-data", type: "query", label: "queries" },
+            { source: "market-hunter", target: "influencer-data", type: "query", label: "queries" },
+            { source: "market-hunter", target: "technical-data", type: "query", label: "queries" },
+            { source: "market-hunter", target: "institutional-data", type: "query", label: "queries" },
+            { source: "market-hunter", target: "derivatives-data", type: "query", label: "queries" },
+            { source: "market-hunter", target: "macro-data", type: "query", label: "queries" },
+            
+            // Market Hunter signals
+            { source: "market-hunter", target: "intelligent-exec", type: "signal", label: "signals" },
+            { source: "market-hunter", target: "market-analyzer", type: "signal", label: "signals" },
+            { source: "market-hunter", target: "content-creator", type: "signal", label: "signals" },
+            
+            // Data flow
+            { source: "data-collector", target: "market-analyzer", type: "data", label: "price data" },
+            { source: "market-analyzer", target: "content-creator", type: "data", label: "analysis" },
+            { source: "market-analyzer", target: "intelligent-exec", type: "data", label: "sentiment" },
+            { source: "content-creator", target: "social-publisher", type: "data", label: "content" },
+            { source: "content-creator", target: "reddit-publisher", type: "data", label: "content" },
+            
+            // Bitcoin Orchestrator
+            { source: "bitcoin-orch", target: "data-collector", type: "coordination", label: "schedules" },
+            { source: "bitcoin-orch", target: "market-analyzer", type: "coordination", label: "triggers" },
+            { source: "bitcoin-orch", target: "content-creator", type: "coordination", label: "coordinates" },
+            
+            // Performance Optimizer
+            { source: "performance-opt", target: "strategic-orch", type: "data", label: "analyzes" },
+            { source: "performance-opt", target: "market-hunter", type: "data", label: "optimizes" },
+            { source: "performance-opt", target: "market-analyzer", type: "data", label: "improves" },
+            
+            // Database connections
+            { source: "strategic-orch", target: "database", type: "logs", label: "logs" },
+            { source: "market-hunter", target: "database", type: "logs", label: "stores" },
+            { source: "market-analyzer", target: "database", type: "logs", label: "stores" },
+            { source: "intelligent-exec", target: "database", type: "logs", label: "stores" },
+            { source: "performance-opt", target: "database", type: "logs", label: "stores" },
+            { source: "social-publisher", target: "database", type: "logs", label: "logs" },
+            { source: "reddit-publisher", target: "database", type: "logs", label: "logs" },
+            { source: "true-agentic-orch", target: "database", type: "logs", label: "stores" }
+        ];
+        
+        const simulation = d3.forceSimulation(nodes)
+            .force("link", d3.forceLink(links).id(d => d.id).distance(120))
+            .force("charge", d3.forceManyBody().strength(-400))
+            .force("center", d3.forceCenter(width / 2, height / 2))
+            .force("collision", d3.forceCollide().radius(50))
+            .force("x", d3.forceX(width / 2).strength(0.05))
+            .force("y", d3.forceY(d => d.layer * height / 6).strength(0.3));
+        
+        const link = svg.append("g")
+            .attr("class", "links")
+            .selectAll("line")
+            .data(links)
+            .join("line")
+            .attr("stroke", d => {
+                if (d.type === "coordination") return "#667eea";
+                if (d.type === "data") return "#4ecdc4";
+                if (d.type === "signal") return "#ff6b6b";
+                if (d.type === "logs") return "#95e1d3";
+                if (d.type === "query") return "#ffd93d";
+                if (d.type === "manages") return "#764ba2";
+                return "#999";
+            })
+            .attr("stroke-width", 2)
+            .attr("marker-end", d => `url(#arrow-${d.type})`);
+        
+        const node = svg.append("g")
+            .attr("class", "nodes")
+            .selectAll("g")
+            .data(nodes)
+            .join("g")
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended));
+        
+        node.append("circle")
+            .attr("r", d => d.autonomy ? 15 + d.autonomy / 10 : 15)
+            .attr("fill", d => {
+                if (d.type === "meta") return "#ff6b6b";
+                if (d.type === "intelligence") return "#4ecdc4";
+                if (d.type === "execution") return "#ffd93d";
+                if (d.type === "adaptive") return "#a8e6cf";
+                if (d.type === "task") return "#95b8d1";
+                if (d.type === "coordinator") return "#b8bedd";
+                if (d.type === "datasource") return "#f38181";
+                if (d.type === "database") return "#95e1d3";
+                return "#ddd";
+            });
+        
+        const labels = node.append("text")
+            .text(d => d.name)
+            .attr("text-anchor", "middle")
+            .attr("dy", "0.35em")
+            .style("font-size", "11px")
+            .style("fill", "#333")
+            .each(function(d) {
+                const lines = d.name.split('\n');
+                if (lines.length > 1) {
+                    d3.select(this).text('');
+                    lines.forEach((line, i) => {
+                        d3.select(this).append('tspan')
+                            .text(line)
+                            .attr('x', 0)
+                            .attr('dy', i === 0 ? -8 : 14);
+                    });
+                }
+            });
+        
+        // Tooltip
+        const tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+        
+        node.on("mouseover", function(event, d) {
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", 1);
+            tooltip.html(`
+                <h3>${d.name.replace('\n', ' ')}</h3>
+                <p><strong>Type:</strong> ${d.type}</p>
+                ${d.autonomy ? `<p><strong>Autonomy:</strong> ${d.autonomy}%</p>` : ''}
+                <p><strong>Description:</strong> ${d.description}</p>
+            `)
+                .style("left", (event.pageX + 10) + "px")
+                .style("top", (event.pageY - 10) + "px");
+            
+            d3.select(this).select("circle")
+                .transition()
+                .duration(200)
+                .attr("r", d => (d.autonomy ? 15 + d.autonomy / 10 : 15) * 1.3)
+                .attr("stroke-width", 4);
+        })
+        .on("mouseout", function(event, d) {
+            tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+            
+            d3.select(this).select("circle")
+                .transition()
+                .duration(200)
+                .attr("r", d => d.autonomy ? 15 + d.autonomy / 10 : 15)
+                .attr("stroke-width", 2);
+        });
+        
+        simulation.on("tick", () => {
+            link
+                .attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
+            
+            node
+                .attr("transform", d => `translate(${d.x},${d.y})`);
+        });
+        
+        function dragstarted(event) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            event.subject.fx = event.subject.x;
+            event.subject.fy = event.subject.y;
+        }
+        
+        function dragged(event) {
+            event.subject.fx = event.x;
+            event.subject.fy = event.y;
+        }
+        
+        function dragended(event) {
+            if (!event.active) simulation.alphaTarget(0);
+            event.subject.fx = null;
+            event.subject.fy = null;
+        }
+        
+        function resetSimulation() {
+            nodes.forEach(d => {
+                d.fx = null;
+                d.fy = null;
+            });
+            simulation.alpha(1).restart();
+        }
+        
+        let labelsVisible = true;
+        function toggleLabels() {
+            labelsVisible = !labelsVisible;
+            labels.style("opacity", labelsVisible ? 1 : 0);
+        }
+        
+        function highlightPath(pathType) {
+            link.style("opacity", 0.1);
+            node.style("opacity", 0.3);
+            
+            if (pathType === "strategic") {
+                const strategicNodes = ["strategic-orch", "true-agentic-orch", "market-hunter", "performance-opt", "market-analyzer", "content-creator", "intelligent-exec"];
+                node.filter(d => strategicNodes.includes(d.id)).style("opacity", 1);
+                link.filter(d => strategicNodes.includes(d.source.id) && strategicNodes.includes(d.target.id)).style("opacity", 1);
+            } else if (pathType === "trading") {
+                const tradingNodes = ["market-hunter", "market-analyzer", "intelligent-exec", "database", "whale-data", "narrative-data", "macro-data"];
+                node.filter(d => tradingNodes.includes(d.id)).style("opacity", 1);
+                link.filter(d => tradingNodes.includes(d.source.id) && tradingNodes.includes(d.target.id)).style("opacity", 1);
+            } else if (pathType === "content") {
+                const contentNodes = ["data-collector", "market-analyzer", "content-creator", "social-publisher", "reddit-publisher", "bitcoin-orch"];
+                node.filter(d => contentNodes.includes(d.id)).style("opacity", 1);
+                link.filter(d => contentNodes.includes(d.source.id) && contentNodes.includes(d.target.id)).style("opacity", 1);
+            }
+        }
+        
+        function resetHighlight() {
+            link.style("opacity", 0.6);
+            node.style("opacity", 1);
+        }
+    </script>
+</body>
+</html>
